@@ -1,20 +1,28 @@
 <!--  -->
+<style lang="less" scoped>
+
+</style>
+
 <template>
-  <view class='container'></view>
+  <view class='container' @tap="gotoChatPage">点击进入聊天</view>
 </template>
 
 <script>
-  import wepy from 'wepy';
+  import wepy from 'wepy'
   export default class Example extends wepy.page {
     config = {
-      navigationBarTitleText: "",
+      navigationBarTitleText: ''
     };
 
     data = {};
 
     components = {};
 
-    methods = {};
+    methods = {
+      gotoChatPage() {
+        wepy.navigateTo({ url: 'chatIndividual' })
+      }
+    };
 
     events = {};
 
@@ -27,6 +35,3 @@
     onShow() { };
   }
 </script>
-
-<style lang="less" scoped>
-</style>
