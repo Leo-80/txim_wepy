@@ -82,7 +82,8 @@ export default class Example extends wepy.page {
   
     initIM() {
       webimHandler.init({
-        selToID: '4507737972616568832' // 消息接收方id
+        selToID: '4507737972616568832', // 消息接收方id
+        selTypeIsGroup: true
       })
       var loginInfo = {
         'identifier': '4503021118450921472', // 当前用户ID,必须是否字符串类型，选填
@@ -92,7 +93,8 @@ export default class Example extends wepy.page {
 
       var listeners = {
         'onConnNotify': webimHandler.onConnNotify, // 监听连接状态回调变化事件
-        'onMsgNotify': this.onMsgNotify // 监听新消息(私聊，普通群(非直播聊天室)消息，全员推送消息)事件
+        'onMsgNotify': this.onMsgNotify, // 监听新消息(私聊，普通群(非直播聊天室)消息，全员推送消息)事件
+        'onBigGroupMsgNotify': this.onBigGroupMsgNotify
       }
       webimHandler.sdkLogin(loginInfo, listeners)
     };
@@ -115,6 +117,12 @@ export default class Example extends wepy.page {
     onMsgNotify(newMsgList) {
       webimHandler.onMsgNotify(newMsgList, function(newMsg) {
         console.log('====newMsg:', newMsg)
+      })
+    }
+    onBigGroupMsgNotify(msg) {
+      console.log('======000000', msg)
+      webimHandler.onBigGroupMsgNotify(msg, function(msgs) {
+        console.log('====== 1111', msgs)
       })
     }
 }
