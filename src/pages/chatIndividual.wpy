@@ -1,0 +1,125 @@
+<!-- 单人聊天 -->
+<template>
+  <view class='container'>
+      <view @tap='sendIMMsg'>发送消息文字消息</view>
+      <view @tap='sendCustomerMsg'>发送自定义消息</view>
+      <view @tap='getLastC2CHistoryMsgs'>获取个人聊天历史消息</view>
+      <view @tap='unReadMsg'>获取未读消息</view>
+      <view @tap='getRecentContactList'>获取最近联系列表</view>
+      <view @tap='getSessionList'>获取所有会话</view>
+      <view>{{selfMsg}}</view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import webimHandler from '../utils/webim_handler.js'
+  import webimWX from '../utils/imsdk/webim_wx.js'
+export default class Example extends wepy.page {
+    config = {
+      navigationBarTitleText: ''
+    };
+
+    data = {
+      selfMsg: ''
+    };
+
+    components = {};
+
+    methods = {
+      sendIMMsg() {
+        var content = '发送一条测试消息来自leo'
+        var that = this
+        if (!content.replace(/^\s*|\s*$/g, '')) return
+        webimHandler.onSendMsg(content, function() {
+          that.selfMsg = content
+          that.$apply()
+          console.log('发送成功:', that.selfMsg)
+        })
+      },
+      sendCustomerMsg() {
+        var custObj = {
+          data: '测试消息',
+          imageUrl: 'http://77777',
+          abc: '这是相关内容'
+        }
+        webimHandler.sendCustomMsg(custObj)
+      },
+      getLastC2CHistoryMsgs() {
+        webimHandler.getLastC2CHistoryMsgs(function(list) {
+          console.log('=========historyMsgs:', list)
+        }, function(errorInfo) {
+          console.log('======errorInfo:', errorInfo)
+        })
+      },
+      unReadMsg() {
+        webimHandler.getUnreadMsg()
+      },
+      getRecentContactList() {
+        webimHandler.getRecentContactList()
+      },
+      getSessionList() {
+        webimHandler.getSessionList()
+      }
+    };
+
+    events = {};
+
+    watch = {};
+
+    computed = {};
+
+    onLoad() { };
+
+    onShow() {
+      var tempStr = '{&quot;data&quot;:&quot;一起吃鸡&quot;,&quot;imageUrl&quot;:&quot;http://77777&quot;,&quot;abc&quot;:&quot;我是大虾米&quot;}'
+      tempStr = tempStr.replace(/&quot;/g, '"')
+      console.log('-----------tempStr:', tempStr)
+      var aaa = JSON.parse(tempStr)
+      console.log('aaa ========', aaa)
+      this.initIM()
+    };
+  
+    initIM() {
+      webimHandler.init({
+        selToID: '4507737972616568832' // 消息接收方id
+      })
+      var loginInfo = {
+        'identifier': '4503021118450921472', // 当前用户ID,必须是否字符串类型，选填
+        'identifierNick': 'leo', // 当前用户昵称，选填
+        'userSig': 'eJxlj8FOg0AURfd8BWFbo29meIWauGgpNEJNlJY4siEUBh2plMCIVOO-q9hEEu-qJefk3dwPTdd1Y7venKdZdnitVKKOtTD0S90A4*wP1rXMk1QlrMn-QdHXshFJWijRDJAgIgUYOzIXlZKFPBkmAgNKCLG-rxklpkVHcpuXydD4*80EIMykaI0V*TjAGzdyrlechk-TcIMTf9r5ZRZE-gyyrF2rtHf2Xd1778c77ge7ls*lO2fNInLc1YN7sX3mduEtYxpjeLtYtnvHjfm9t*PVm19OAsu*GlUq*SJO8xiiCUhwRDvRtPJQDQIFgoQy*ImhfWpfJXVeAw__' // 当前用户身份凭证，必须是字符串类型，选填
+      }
+
+      var listeners = {
+        'onConnNotify': webimHandler.onConnNotify, // 监听连接状态回调变化事件
+        'onMsgNotify': this.onMsgNotify // 监听新消息(私聊，普通群(非直播聊天室)消息，全员推送消息)事件
+      }
+      webimHandler.sdkLogin(loginInfo, listeners)
+    };
+    onConnNotify(resp) {
+      debugger
+      console.error('\n ======resp \n', resp)
+  
+      switch (resp.ErrorCode) {
+        case webimWX.CONNECTION_STATUS.ON:
+                    // webim.Log.warn('连接状态正常...');
+          break
+        case webimWX.CONNECTION_STATUS.OFF:
+          webimWX.Log.warn('连接已断开，无法收到新消息，请检查下你的网络是否正常')
+          break
+        default:
+          webimWX.Log.error('未知连接状态,status=' + resp.ErrorCode)
+          break
+      }
+    };
+    onMsgNotify(newMsgList) {
+      webimHandler.onMsgNotify(newMsgList, function(newMsg) {
+        console.log('====newMsg:', newMsg)
+      })
+    }
+}
+</script>
+
+<style lang="less" scoped>
+
+</style>
