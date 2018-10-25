@@ -17,7 +17,8 @@ export default class extends wepy.app {
   config = {
     pages: [
       'pages/index',
-      'pages/chatIndividual'
+      'pages/chatIndividual',
+      'pages/chatGroup'
     ],
     window: {
       backgroundTextStyle: 'light',

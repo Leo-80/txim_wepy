@@ -4,7 +4,10 @@
 </style>
 
 <template>
-  <view class='container' @tap="gotoChatPage">点击进入聊天</view>
+  <view class='container'>
+    <view @tap="gotoChatPage('individual')">点击进入单聊</view>
+    <view @tap="gotoChatPage('group')">点击进入群聊</view>
+  </view>
 </template>
 
 <script>
@@ -19,8 +22,14 @@
     components = {};
 
     methods = {
-      gotoChatPage() {
-        wepy.navigateTo({ url: 'chatIndividual' })
+      gotoChatPage(chatType) {
+        var chatpage = ''
+        if (chatType === 'individual') {
+          chatpage = 'chatIndividual'
+        } else if (chatType === 'group') {
+          chatpage = 'chatGroup'
+        }
+        wepy.navigateTo({ url: chatpage })
       }
     };
 

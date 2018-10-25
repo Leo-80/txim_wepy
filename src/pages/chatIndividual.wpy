@@ -83,18 +83,17 @@ export default class Example extends wepy.page {
     initIM() {
       webimHandler.init({
         selToID: '4507737972616568832', // 消息接收方id
-        selTypeIsGroup: true
+        selTypeIsGroup: false
       })
       var loginInfo = {
-        'identifier': '4503021118450921472', // 当前用户ID,必须是否字符串类型，选填
+        'identifier': '4520350323367952384', // 当前用户ID,必须是否字符串类型，选填
         'identifierNick': 'leo', // 当前用户昵称，选填
-        'userSig': 'eJxlj8FOg0AURfd8BWFbo29meIWauGgpNEJNlJY4siEUBh2plMCIVOO-q9hEEu-qJefk3dwPTdd1Y7venKdZdnitVKKOtTD0S90A4*wP1rXMk1QlrMn-QdHXshFJWijRDJAgIgUYOzIXlZKFPBkmAgNKCLG-rxklpkVHcpuXydD4*80EIMykaI0V*TjAGzdyrlechk-TcIMTf9r5ZRZE-gyyrF2rtHf2Xd1778c77ge7ls*lO2fNInLc1YN7sX3mduEtYxpjeLtYtnvHjfm9t*PVm19OAsu*GlUq*SJO8xiiCUhwRDvRtPJQDQIFgoQy*ImhfWpfJXVeAw__' // 当前用户身份凭证，必须是字符串类型，选填
+        'userSig': 'eJxlj81OwkAURvd9iqZbjd7OnREwcSFStQRLqUCQTdOfKUyaaccykoLx3cVK4iTe7Tn5Tu6nZdu2M5*8XiVZVn9UOtYHxR371nbAufyDSok8TnSMTf4P8laJhsdJoXnTQZcxRgBMR*S80qIQZ4OeODJAgnjTGzCCfWrIu7yMu*LvGgVwkRLWMxWx6eCLt3jwZ6PVRVunMn0P0mUaCRmO-JVMx*vSY2zOnx4jd6Gk1xJw9czfhGuZ6TGZ3uuDT6Fo8zDYXr-tIRkeVX0UQzV5DqqtWka0vDOSWkh*fo8C6SPiwKB73uxEXXXCqcNcgvBzjvVlfQPaWl*x' // 当前用户身份凭证，必须是字符串类型，选填
       }
 
       var listeners = {
         'onConnNotify': webimHandler.onConnNotify, // 监听连接状态回调变化事件
-        'onMsgNotify': this.onMsgNotify, // 监听新消息(私聊，普通群(非直播聊天室)消息，全员推送消息)事件
-        'onBigGroupMsgNotify': this.onBigGroupMsgNotify
+        'onMsgNotify': this.onMsgNotify // 监听新消息(私聊，普通群(非直播聊天室)消息，全员推送消息)事件
       }
       webimHandler.sdkLogin(loginInfo, listeners)
     };
@@ -117,12 +116,6 @@ export default class Example extends wepy.page {
     onMsgNotify(newMsgList) {
       webimHandler.onMsgNotify(newMsgList, function(newMsg) {
         console.log('====newMsg:', newMsg)
-      })
-    }
-    onBigGroupMsgNotify(msg) {
-      console.log('======000000', msg)
-      webimHandler.onBigGroupMsgNotify(msg, function(msgs) {
-        console.log('====== 1111', msgs)
       })
     }
 }

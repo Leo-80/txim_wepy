@@ -15,6 +15,7 @@ var selToID
     ,loginOptions
     ,selTypeIsGroup
     ,getPrePageC2CHistroyMsgInfoMap = {}
+    ,recentSessMap = {}
 
 //监听新消息(私聊(包括普通消息、全员推送消息)，普通群(非直播聊天室)消息)事件
 //newMsgList 为新消息数组，结构为[Msg]
@@ -53,8 +54,7 @@ function onBigGroupMsgNotify(msgList,callback) {
         webim.Log.warn('receive a new avchatroom group msg: ' + msg.getFromAccountNick());
         //显示收到的消息
         console.log("Group ---------0000",msg);
-        callback(showMsg(msg));
-        //showMsg(msg);
+        callback(msg);
     }
 }
 //sdk登录
@@ -84,7 +84,8 @@ function sdkLogin(userInfo, listeners) {
                     "Tag": "Tag_Profile_IM_Nick",
                     "Value": userInfo.identifierNick
                 }]
-            },function(){             
+            },function(){
+                console.log('群登录！！！');      
             })
         },
         function (err) {            
@@ -395,6 +396,7 @@ var getLastC2CHistoryMsgs = function (cbOk, cbError) {
 }
 //获取最新的群历史消息,用于切换群组聊天时，重新拉取群组的聊天消息
 var getLastGroupHistoryMsgs = function(cbOk) {
+    debugger
     if (selType == webim.SESSION_TYPE.C2C) {
         console.error('当前的聊天类型为好友聊天，不能进行拉取群历史消息操作');
         return;
@@ -427,12 +429,11 @@ var getLastGroupHistoryMsgs = function(cbOk) {
                     "ReqMsgSeq": msgSeq
                 };
                 //清空聊天界面
-                document.getElementsByClassName("msgflow")[0].innerHTML = "";
                 if (cbOk)
                     cbOk(msgList);
             },
             function(err) {
-                alert(err.ErrorInfo);
+                console.error(err.ErrorInfo);
             }
         );
     });
@@ -482,6 +483,52 @@ var getPrePageGroupHistoryMsgs = function(cbOk) {
         },
         function(err) {
             console.error(err.ErrorInfo);
+        }
+    );
+};
+
+//读取群组基本资料-高级接口
+var getGroupInfo = function(group_id, cbOK, cbErr) {
+    var options = {
+        'GroupIdList': [
+            group_id
+        ],
+        'GroupBaseInfoFilter': [
+            'Type',
+            'Name',
+            'Introduction',
+            'Notification',
+            'FaceUrl',
+            'CreateTime',
+            'Owner_Account',
+            'LastInfoTime',
+            'LastMsgTime',
+            'NextMsgSeq',
+            'MemberNum',
+            'MaxMemberNum',
+            'ApplyJoinOption',
+            'ShutUpAllMember'
+        ],
+        'MemberInfoFilter': [
+            'Account',
+            'Role',
+            'JoinTime',
+            'LastSendMsgTime',
+            'ShutUpUntil'
+        ]
+    };
+    webim.getGroupInfo(
+        options,
+        function(resp) {
+            if (resp.GroupInfo[0].ShutUpAllMember == 'On') {
+                alert('该群组已开启全局禁言');
+            }
+            if (cbOK) {
+                cbOK(resp);
+            }
+        },
+        function(err) {
+            cbErr(err.ErrorInfo);
         }
     );
 };
@@ -568,20 +615,25 @@ function delChat(to_id, callback) {
           }
       )
   }
-//创建群
+
 /**
- * 创建群 群类型 type详解地址
+ * 创建群 
+ * 群类型 type详解地址
  * https://cloud.tencent.com/document/product/269/1502#.E7.BE.A4.E7.BB.84.E5.BD.A2.E6.80.81.E4.BB.8B.E7.BB.8D
- * @param {*} groupId 
- * @param {*} loginInfo 
- * @param {*} callback 
+ * @param {groupId,gType,gName} groupInfo 
+ * @param {*} cbOk 
+ * @param {*} cbError 
  */
-function createBigGroup(groupId,loginInfo,callback) {
+function createBigGroup(groupInfo,cbOk,cbError) {
+    if (!groupInfo.groupId) {
+        console.error('群ID不能为空');
+        return
+    }
     var options = {
-      'GroupId': groupId,
+      'GroupId': groupInfo.groupId,
       'Owner_Account': loginInfo.identifier,
-      'Type': 'AVChatRoom',
-      'Name': 'DemoGroup',
+      'Type': groupInfo.gType ?  groupInfo.gType:'AVChatRoom',
+      'Name': groupInfo.gName? groupInfo.gName:'DemoGroup',
       'MemberList': [],
       "ApplyJoinOption": "FreeAccess"  // 申请加群处理方式（选填）
     };
@@ -589,11 +641,11 @@ function createBigGroup(groupId,loginInfo,callback) {
       options,
       function (resp) {
           console.info( 'succ' )
-          callback();
+          cbOk(resp);
       },
       function (err) {
         console.error(err.ErrorInfo);
-        callback();
+        cbError(err);
       }
     );
   }
@@ -655,7 +707,7 @@ function quitBigGroup() {
  */
 function init(opts){
     selToID = opts.selToID;
-    selTypeIsGroup = opts.selTypeGroup;
+    selTypeIsGroup = opts.selTypeIsGroup;
     selType= selTypeIsGroup? webim.SESSION_TYPE.GROUP:webim.SESSION_TYPE.C2C;
 }
 
@@ -831,4 +883,6 @@ module.exports = {
     createBigGroup:createBigGroup,
     applyJoinBigGroup:applyJoinBigGroup,
     quitBigGroup:quitBigGroup,
+    getLastGroupHistoryMsgs:getLastGroupHistoryMsgs,
+    getPrePageGroupHistoryMsgs:getPrePageGroupHistoryMsgs
 };
