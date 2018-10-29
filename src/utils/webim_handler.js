@@ -16,6 +16,7 @@ var selToID
     ,selTypeIsGroup
     ,getPrePageC2CHistroyMsgInfoMap = {}
     ,recentSessMap = {}
+    ,getPrePageGroupHistroyMsgInfoMap ={}
 
 //监听新消息(私聊(包括普通消息、全员推送消息)，普通群(非直播聊天室)消息)事件
 //newMsgList 为新消息数组，结构为[Msg]
@@ -47,7 +48,6 @@ function onMsgNotify(newMsgList,callback) {
 }
 //监听大群新消息（普通，点赞，提示，红包）
 function onBigGroupMsgNotify(msgList,callback) {
-    debugger
     for (var i = msgList.length - 1; i >= 0; i--) {//遍历消息，按照时间从后往前
         var msg = msgList[i];
         //console.warn(msg);
@@ -258,9 +258,10 @@ function onSendMsg(msg,cbOk,cbError) {
         }
     }
     webim.sendMsg(msg, function (resp) {
-        if (selType == webim.SESSION_TYPE.C2C) {//私聊时，在聊天窗口手动添加一条发的消息，群聊时，长轮询接口会返回自己发的消息
-            cbOk(resp)
-        }
+        // if (selType == webim.SESSION_TYPE.C2C) {//私聊时，在聊天窗口手动添加一条发的消息，群聊时，长轮询接口会返回自己发的消息
+            
+        // }
+        cbOk(resp)
         webim.Log.info("发消息成功");
         //hideDiscussForm();//隐藏评论表单
         //showDiscussTool();//显示评论工具栏
@@ -396,7 +397,6 @@ var getLastC2CHistoryMsgs = function (cbOk, cbError) {
 }
 //获取最新的群历史消息,用于切换群组聊天时，重新拉取群组的聊天消息
 var getLastGroupHistoryMsgs = function(cbOk) {
-    debugger
     if (selType == webim.SESSION_TYPE.C2C) {
         console.error('当前的聊天类型为好友聊天，不能进行拉取群历史消息操作');
         return;
@@ -632,7 +632,7 @@ function createBigGroup(groupInfo,cbOk,cbError) {
     var options = {
       'GroupId': groupInfo.groupId,
       'Owner_Account': loginInfo.identifier,
-      'Type': groupInfo.gType ?  groupInfo.gType:'AVChatRoom',
+      'Type': groupInfo.gType ?  groupInfo.gType:'ChatRoom',
       'Name': groupInfo.gName? groupInfo.gName:'DemoGroup',
       'MemberList': [],
       "ApplyJoinOption": "FreeAccess"  // 申请加群处理方式（选填）
@@ -650,7 +650,7 @@ function createBigGroup(groupInfo,cbOk,cbError) {
     );
   }
   
-  //进入大群
+  //加入大群
   function applyJoinBigGroup(groupId) {
       var options = {
           'GroupId': groupId//群id
@@ -670,6 +670,138 @@ function createBigGroup(groupInfo,cbOk,cbError) {
           }
       );
   }
+//获取我的群组
+var getMyGroupList = function () {
+    initGetMyGroupTable([]);
+    var options = {
+        'Member_Account': loginInfo.identifier,
+        'Limit': totalCount,
+        'Offset': 0,
+        //'GroupType':'',
+        'GroupBaseInfoFilter': [
+            'Type',
+            'Name',
+            'Introduction',
+            'Notification',
+            'FaceUrl',
+            'CreateTime',
+            'Owner_Account',
+            'LastInfoTime',
+            'LastMsgTime',
+            'NextMsgSeq',
+            'MemberNum',
+            'MaxMemberNum',
+            'ApplyJoinOption',
+            'ShutUpAllMember'
+        ],
+        'SelfInfoFilter': [
+            'Role',
+            'JoinTime',
+            'MsgFlag',
+            'UnreadMsgNum'
+        ]
+    };
+    webim.getJoinedGroupListHigh(
+            options,
+            function (resp) {
+                if (!resp.GroupIdList || resp.GroupIdList.length == 0) {
+                    alert('您目前还没有加入任何群组');
+                    return;
+                }
+                var data = [];
+                for (var i = 0; i < resp.GroupIdList.length; i++) {
+                    var group_id = resp.GroupIdList[i].GroupId;
+                    var name = webim.Tool.formatText2Html(resp.GroupIdList[i].Name);
+                    var type_en = resp.GroupIdList[i].Type;
+                    var type = webim.Tool.groupTypeEn2Ch(resp.GroupIdList[i].Type);
+                    var role_en = resp.GroupIdList[i].SelfInfo.Role;
+                    var role = webim.Tool.groupRoleEn2Ch(resp.GroupIdList[i].SelfInfo.Role);
+                    var msg_flag = webim.Tool.groupMsgFlagEn2Ch(
+                    resp.GroupIdList[i].SelfInfo.MsgFlag);
+                    var msg_flag_en = resp.GroupIdList[i].SelfInfo.MsgFlag;
+                    var join_time = webim.Tool.formatTimeStamp(
+                    resp.GroupIdList[i].SelfInfo.JoinTime);
+                    var member_num = resp.GroupIdList[i].MemberNum;
+                    var notification = webim.Tool.formatText2Html(
+                    resp.GroupIdList[i].Notification);
+                    var introduction = webim.Tool.formatText2Html(
+                    resp.GroupIdList[i].Introduction);
+                    var ShutUpAllMember = resp.GroupIdList[i].ShutUpAllMember;
+                    data.push({
+                        'GroupId': group_id,
+                        'Name': name,
+                        'TypeEn': type_en,
+                        'Type': type,
+                        'RoleEn': role_en,
+                        'Role': role,
+                        'MsgFlagEn': msg_flag_en,
+                        'MsgFlag': msg_flag,
+                        'MemberNum': member_num,
+                        'Notification': notification,
+                        'Introduction': introduction,
+                        'JoinTime': join_time,
+                        'ShutUpAllMember': ShutUpAllMember
+                    });
+                }
+                //打开我的群组列表对话框
+                $('#get_my_group_table').bootstrapTable('load', data);
+                $('#get_my_group_dialog').modal('show');
+            },
+            function (err) {
+                alert(err.ErrorInfo);
+            }
+    );
+}
+//读取群组成员
+var getGroupMemberInfo = function (group_id) {
+    initGetGroupMemberTable([]);
+    var options = {
+        'GroupId': group_id,
+        'Offset': 0, //必须从0开始
+        'Limit': totalCount,
+        'MemberInfoFilter': [
+            'Account',
+            'Role',
+            'JoinTime',
+            'LastSendMsgTime',
+            'ShutUpUntil'
+        ]
+    };
+    webim.getGroupMemberInfo(
+            options,
+            function (resp) {
+                if (resp.MemberNum <= 0) {
+                    alert('该群组目前没有成员');
+                    return;
+                }
+                var data = [];
+                for (var i in resp.MemberList) {
+                    var account = resp.MemberList[i].Member_Account;
+                    var role = webim.Tool.groupRoleEn2Ch(resp.MemberList[i].Role);
+                    var join_time = webim.Tool.formatTimeStamp(
+                    resp.MemberList[i].JoinTime);
+                    var shut_up_until = webim.Tool.formatTimeStamp(
+                    resp.MemberList[i].ShutUpUntil);
+                    if (shut_up_until == 0) {
+                        shut_up_until = '-';
+                    }
+                    data.push({
+                        GroupId: group_id,
+                        Member_Account: account,
+                        Role: role,
+                        JoinTime: join_time,
+                        ShutUpUntil: shut_up_until
+                    });
+                }
+                $('#get_group_member_table').bootstrapTable('load', data);
+                $('#get_group_member_dialog').modal('show');
+            },
+            function (err) {
+                alert(err.ErrorInfo);
+            }
+    );
+}
+
 //登出
 function logout() {
     //登出
@@ -884,5 +1016,7 @@ module.exports = {
     applyJoinBigGroup:applyJoinBigGroup,
     quitBigGroup:quitBigGroup,
     getLastGroupHistoryMsgs:getLastGroupHistoryMsgs,
-    getPrePageGroupHistoryMsgs:getPrePageGroupHistoryMsgs
+    getPrePageGroupHistoryMsgs:getPrePageGroupHistoryMsgs,
+    getMyGroupList:getMyGroupList,
+    getGroupMemberInfo:getGroupMemberInfo
 };
