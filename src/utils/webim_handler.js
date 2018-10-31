@@ -17,6 +17,7 @@ var selToID
     ,getPrePageC2CHistroyMsgInfoMap = {}
     ,recentSessMap = {}
     ,getPrePageGroupHistroyMsgInfoMap ={}
+    ,totalCount = 200
 
 //监听新消息(私聊(包括普通消息、全员推送消息)，普通群(非直播聊天室)消息)事件
 //newMsgList 为新消息数组，结构为[Msg]
@@ -130,11 +131,11 @@ function setProfilePortrait(options,callback){
 // 搜索用户
 function searchProfileByUserId(userid, cbOk, cbError) {
     if (userid.length == 0) {
-        alert('请输入用户ID')
+        console.error('请输入用户ID')
           return;
       }
     if (webim.Tool.trimStr(userid).length == 0) {
-        alert('您输入的用户ID全是空格,请重新输入')
+        console.error('您输入的用户ID全是空格,请重新输入');
           return;
       }
     var tag_list = [
@@ -365,7 +366,7 @@ var getPrePageC2CHistoryMsgs = function(cbOk, cbError) {
 //获取最新的 C2C 历史消息,用于切换好友聊天，重新拉取好友的聊天消息
 var getLastC2CHistoryMsgs = function (cbOk, cbError) {
     if (selType == webim.SESSION_TYPE.GROUP) {
-        alert('当前的聊天类型为群聊天，不能进行拉取好友历史消息操作');
+        console.error('当前的聊天类型为群聊天，不能进行拉取好友历史消息操作');
         return;
     }
     var lastMsgTime = 0;//第一次拉取好友历史消息时，必须传 0
@@ -671,8 +672,8 @@ function createBigGroup(groupInfo,cbOk,cbError) {
       );
   }
 //获取我的群组
-var getMyGroupList = function () {
-    initGetMyGroupTable([]);
+var getMyGroupList = function (cbOk,cbError) {
+    // initGetMyGroupTable([]);
     var options = {
         'Member_Account': loginInfo.identifier,
         'Limit': totalCount,
@@ -705,7 +706,7 @@ var getMyGroupList = function () {
             options,
             function (resp) {
                 if (!resp.GroupIdList || resp.GroupIdList.length == 0) {
-                    alert('您目前还没有加入任何群组');
+                    console.error('您目前还没有加入任何群组');
                     return;
                 }
                 var data = [];
@@ -744,17 +745,18 @@ var getMyGroupList = function () {
                     });
                 }
                 //打开我的群组列表对话框
-                $('#get_my_group_table').bootstrapTable('load', data);
-                $('#get_my_group_dialog').modal('show');
+                // $('#get_my_group_table').bootstrapTable('load', data);
+                // $('#get_my_group_dialog').modal('show');
+                cbOk(data)
             },
             function (err) {
-                alert(err.ErrorInfo);
+                cbError(err.ErrorInfo)
             }
     );
 }
 //读取群组成员
-var getGroupMemberInfo = function (group_id) {
-    initGetGroupMemberTable([]);
+var getGroupMemberInfo = function (group_id,cbOK,cbError) {
+    // initGetGroupMemberTable([]);
     var options = {
         'GroupId': group_id,
         'Offset': 0, //必须从0开始
@@ -771,7 +773,7 @@ var getGroupMemberInfo = function (group_id) {
             options,
             function (resp) {
                 if (resp.MemberNum <= 0) {
-                    alert('该群组目前没有成员');
+                    console.error('该群组目前没有成员');
                     return;
                 }
                 var data = [];
@@ -793,11 +795,13 @@ var getGroupMemberInfo = function (group_id) {
                         ShutUpUntil: shut_up_until
                     });
                 }
-                $('#get_group_member_table').bootstrapTable('load', data);
-                $('#get_group_member_dialog').modal('show');
+                // $('#get_group_member_table').bootstrapTable('load', data);
+                // $('#get_group_member_dialog').modal('show');
+                cbOK(data)
             },
             function (err) {
-                alert(err.ErrorInfo);
+                // alert(err.ErrorInfo);
+                cbError(err.ErrorInfo)
             }
     );
 }

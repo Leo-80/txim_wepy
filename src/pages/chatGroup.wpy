@@ -8,7 +8,9 @@
       <view @tap='joinChatGroup'>加入群聊</view>
       <view @tap='sendIMMsg'>发送消息</view>
       <view @tap='fetchLastHistoryMsg'>获取最近群组历史消息</view>
-       <view @tap='fetchHistoryMsg'>获取下拉群组历史消息</view>
+      <view @tap='fetchHistoryMsg'>获取下拉群组历史消息</view>
+      <view @tap='fetchGroupList'>获取我的群组列表</view>
+      <view @tap='fetchGroupMemberInfo'>获取群成员信息</view>
   </view>
 </template>
 
@@ -22,7 +24,7 @@ export default class Example extends wepy.page {
     };
 
     data = {
-      groupId: 'leoTest2'
+      groupId: 'leoTest1'
     };
 
     components = {};
@@ -65,6 +67,20 @@ export default class Example extends wepy.page {
         webimHandler.getPrePageGroupHistoryMsgs(function(resp) {
           console.log('getPrePageGroupHistoryMsgs === 111', resp)
         })
+      },
+      fetchGroupList() {
+        webimHandler.getMyGroupList(function(resp) {
+          console.log('fetchGroupList ==== 222', resp)
+        }, function(err) {
+          console.log('fetchGroupList err === 222', err)
+        })
+      },
+      fetchGroupMemberInfo() {
+        webimHandler.getGroupMemberInfo(this.groupId, function(resp) {
+          console.log('fetchGroupMemberInfo ==== 333', resp)
+        }, function(err) {
+          console.log('fetchGroupMemberInfo err ====333', err)
+        })
       }
     };
 
@@ -88,17 +104,17 @@ export default class Example extends wepy.page {
         selToID: avchatRoomid,
         selTypeIsGroup: true
       })
-    //   var loginInfo = {
-    //     'identifier': '4520350323367952384', // 当前用户ID,必须是否字符串类型，选填
-    //     'identifierNick': 'leo', // 当前用户昵称，选填
-    //     'userSig': 'eJxlj81OwkAURvd9iqZbjd7OnREwcSFStQRLqUCQTdOfKUyaaccykoLx3cVK4iTe7Tn5Tu6nZdu2M5*8XiVZVn9UOtYHxR371nbAufyDSok8TnSMTf4P8laJhsdJoXnTQZcxRgBMR*S80qIQZ4OeODJAgnjTGzCCfWrIu7yMu*LvGgVwkRLWMxWx6eCLt3jwZ6PVRVunMn0P0mUaCRmO-JVMx*vSY2zOnx4jd6Gk1xJw9czfhGuZ6TGZ3uuDT6Fo8zDYXr-tIRkeVX0UQzV5DqqtWka0vDOSWkh*fo8C6SPiwKB73uxEXXXCqcNcgvBzjvVlfQPaWl*x' // 当前用户身份凭证，必须是字符串类型，选填
-    //   }
-        // 小吴
       var loginInfo = {
-        'identifier': '4513522734356803584', // 当前用户ID,必须是否字符串类型，选填
-        'identifierNick': '小吴', // 当前用户昵称，选填
-        'userSig': 'eJxlj01Pg0AARO-8CsIVo-spizfUCtgSQ0uq9UKQ3bWbIuCy3dga-7sRm0jiXN-LTObTcV3XKxar86quu31rSnPohedeuR7wzv5g3yteVqbEmv*D4qNXWpSVNEKPEFJKEQBTR3HRGiXVySAUYopQgAmmlwxgyshEHviuHBd-2wgAEBNEg6miXkeYzTY3aX771DfJ*riwvvRhXM-j602DL-wOGKP9dZ683C1BmoSWNc95uo2yju3lfYElh5GcLW20eyC2spko9GOQchXPj8n7dlgdWDOZNOpNnO7hICQ0DOiEWqEH1bWjgACkEGHwE8-5cr4BWvJe5Q__' // 当前用户身份凭证，必须是字符串类型，选填
+        'identifier': '4520350323367952384', // 当前用户ID,必须是否字符串类型，选填
+        'identifierNick': 'leo', // 当前用户昵称，选填
+        'userSig': 'eJxlj81OwkAURvd9iqZbjd7OnREwcSFStQRLqUCQTdOfKUyaaccykoLx3cVK4iTe7Tn5Tu6nZdu2M5*8XiVZVn9UOtYHxR371nbAufyDSok8TnSMTf4P8laJhsdJoXnTQZcxRgBMR*S80qIQZ4OeODJAgnjTGzCCfWrIu7yMu*LvGgVwkRLWMxWx6eCLt3jwZ6PVRVunMn0P0mUaCRmO-JVMx*vSY2zOnx4jd6Gk1xJw9czfhGuZ6TGZ3uuDT6Fo8zDYXr-tIRkeVX0UQzV5DqqtWka0vDOSWkh*fo8C6SPiwKB73uxEXXXCqcNcgvBzjvVlfQPaWl*x' // 当前用户身份凭证，必须是字符串类型，选填
       }
+        // 小吴
+    //   var loginInfo = {
+    //     'identifier': '4513522734356803584', // 当前用户ID,必须是否字符串类型，选填
+    //     'identifierNick': '小吴', // 当前用户昵称，选填
+    //     'userSig': 'eJxlj01Pg0AARO-8CsIVo-spizfUCtgSQ0uq9UKQ3bWbIuCy3dga-7sRm0jiXN-LTObTcV3XKxar86quu31rSnPohedeuR7wzv5g3yteVqbEmv*D4qNXWpSVNEKPEFJKEQBTR3HRGiXVySAUYopQgAmmlwxgyshEHviuHBd-2wgAEBNEg6miXkeYzTY3aX771DfJ*riwvvRhXM-j602DL-wOGKP9dZ683C1BmoSWNc95uo2yju3lfYElh5GcLW20eyC2spko9GOQchXPj8n7dlgdWDOZNOpNnO7hICQ0DOiEWqEH1bWjgACkEGHwE8-5cr4BWvJe5Q__' // 当前用户身份凭证，必须是字符串类型，选填
+    //   }
 
       var listeners = {
         'onConnNotify': webimHandler.onConnNotify, // 监听连接状态回调变化事件
