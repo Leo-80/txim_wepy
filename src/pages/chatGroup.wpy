@@ -24,7 +24,7 @@ export default class Example extends wepy.page {
     };
 
     data = {
-      groupId: 'leoTest1'
+      groupId: 'leoTest4'
     };
 
     components = {};
@@ -35,52 +35,71 @@ export default class Example extends wepy.page {
           'groupId': this.groupId,
           'gName': 'leoTest1234'
         }
-        webimHandler.createBigGroup(groupinfo,
-        function(resp) {
-          console.log(resp)
-        },
-        function(err) {
-          console.log(err)
-        }
-        )
+        webimHandler.createBigGroup(groupinfo)
+        .then(function(resp) {
+          console.log('createChatGroup === 000', resp)
+        })
+        .catch(function(err) {
+          console.log('createChatGroup === 001', err)
+        })
       },
       joinChatGroup() {
         webimHandler.applyJoinBigGroup(this.groupId)
+        .then(function(resp) {
+          console.log('joinChatGroup === 000', resp)
+        })
+        .catch(function(err) {
+          console.log('joinChatGroup === 001', err)
+        })
       },
       sendIMMsg() {
         var content = '发送一条群组测试消息来自leo'
         if (!content.replace(/^\s*|\s*$/g, '')) return
-        webimHandler.onSendMsg(content,
-        function(resp) {
-          console.log('发送成功:')
-        },
-        function(err) {
-          console.log('send im  msg ', err)
+        webimHandler.onSendMsg(content)
+        .then(function(resp) {
+          console.log('======0000', resp)
+        })
+        .catch(function(err) {
+          console.log('======0001', err)
         })
       },
       fetchLastHistoryMsg() {
-        webimHandler.getLastGroupHistoryMsgs(function(resp) {
+        webimHandler.getLastGroupHistoryMsgs()
+        .then(function(resp) {
           console.log('fetchLastHistoryMsg ====000', resp)
+        })
+        .catch(function(err) {
+          console.log('fetchLastHistoryMsg ====001', err)
         })
       },
       fetchHistoryMsg() {
         webimHandler.getPrePageGroupHistoryMsgs(function(resp) {
-          console.log('getPrePageGroupHistoryMsgs === 111', resp)
+        })
+        webimHandler.getPrePageGroupHistoryMsgs()
+        .then(function(resp) {
+          console.log('getPrePageGroupHistoryMsgs === 000', resp)
+        })
+        .catch(function(err) {
+          console.log('getPrePageGroupHistoryMsgs === 001', err)
         })
       },
       fetchGroupList() {
-        webimHandler.getMyGroupList(function(resp) {
-          console.log('fetchGroupList ==== 222', resp)
-        }, function(err) {
-          console.log('fetchGroupList err === 222', err)
-        })
+        webimHandler.getMyGroupList()
+          .then(function(resp) {
+            console.log('fetchGroupList ==== 000', resp)
+          })
+          .catch(function(err) {
+            console.log('fetchGroupList err === 001', err)
+          })
       },
       fetchGroupMemberInfo() {
-        webimHandler.getGroupMemberInfo(this.groupId, function(resp) {
-          console.log('fetchGroupMemberInfo ==== 333', resp)
-        }, function(err) {
-          console.log('fetchGroupMemberInfo err ====333', err)
-        })
+        webimHandler.getGroupMemberInfo(this.groupId)
+          .then(function(resp) {
+            console.log('fetchGroupMemberInfo ==== 000', resp)
+          })
+          .catch(function(err) {
+            console.log('fetchGroupMemberInfo err ====001', err)
+          })
       }
     };
 

@@ -28,13 +28,17 @@ export default class Example extends wepy.page {
 
     methods = {
       sendIMMsg() {
-        var content = '发送一条测试消息来自leo'
+        var content = '发送一条群组测试消息来自leo'
         var that = this
         if (!content.replace(/^\s*|\s*$/g, '')) return
-        webimHandler.onSendMsg(content, function() {
+        webimHandler.onSendMsg(content)
+        .then(function(resp) {
           that.selfMsg = content
           that.$apply()
-          console.log('发送成功:', that.selfMsg)
+          console.log('======0000', resp)
+        })
+        .catch(function(err) {
+          console.log('======0001', err)
         })
       },
       sendCustomerMsg() {
@@ -44,6 +48,12 @@ export default class Example extends wepy.page {
           abc: '这是相关内容'
         }
         webimHandler.sendCustomMsg(custObj)
+        .then(function(resp) {
+          console.log('sendCustomerMsg === 000', resp)
+        })
+        .catch(function(err) {
+          console.log('sendCustomerMsg === 001', err)
+        })
       },
       getLastC2CHistoryMsgs() {
         webimHandler.getLastC2CHistoryMsgs(function(list) {
@@ -51,15 +61,40 @@ export default class Example extends wepy.page {
         }, function(errorInfo) {
           console.log('======errorInfo:', errorInfo)
         })
+        webimHandler.getLastC2CHistoryMsgs()
+        .then(function(resp) {
+          console.log('getLastC2CHistoryMsgs === 000', resp)
+        })
+        .catch(function(err) {
+          console.log('getLastC2CHistoryMsgs === 001', err)
+        })
       },
       unReadMsg() {
         webimHandler.getUnreadMsg()
+        .then(function(resp) {
+          console.log('unReadMsg === 000', resp)
+        })
+        .catch(function(err) {
+          console.log('unReadMsg === 001', err)
+        })
       },
       getRecentContactList() {
         webimHandler.getRecentContactList()
+        .then(function(resp) {
+          console.log('getRecentContactList === 000', resp)
+        })
+        .catch(function(err) {
+          console.log('getRecentContactList === 001', err)
+        })
       },
       getSessionList() {
         webimHandler.getSessionList()
+        .then(function(resp) {
+          console.log('getSessionList === 000', resp)
+        })
+        .catch(function(err) {
+          console.log('getSessionList === 001', err)
+        })
       }
     };
 

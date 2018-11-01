@@ -96,82 +96,87 @@ function sdkLogin(userInfo, listeners) {
 }
 
 //修改昵称
-function setProfilePortrait(options,callback){
+function setProfilePortrait(options){
 
-    if (!options.identifierNick || !options.selSessHeadUrl) {
-        console.error("昵称或头像不能为空");
-        return
-    }
-
-    var opt = {
-        'ProfileItem':
-          [
-            {
-              'Tag': 'Tag_Profile_IM_Nick',
-              'Value': options.identifierNick ? options.identifierNick:'null'
-            },
-            {
-              'Tag': 'Tag_Profile_IM_Image',
-              'Value': options.selSessHeadUrl ? options.selSessHeadUrl:'null'
-            }
-          ]
-      }
-
-    webim.setProfilePortrait(opt,
-        function(res){
-            webim.Log.info('修改昵称成功');
-            callback && callback();
-        },
-        function(err){
-            console.error(err.ErrorInfo);
+    return new Promise((resolve,reject)=>{
+        if (!options.identifierNick || !options.selSessHeadUrl) {
+            console.error("昵称或头像不能为空");
+            return
         }
-    );
+        var opt = {
+            'ProfileItem':
+              [
+                {
+                  'Tag': 'Tag_Profile_IM_Nick',
+                  'Value': options.identifierNick ? options.identifierNick:'null'
+                },
+                {
+                  'Tag': 'Tag_Profile_IM_Image',
+                  'Value': options.selSessHeadUrl ? options.selSessHeadUrl:'null'
+                }
+              ]
+          }
+          webim.setProfilePortrait(opt,
+            function(res){
+                webim.Log.info('修改昵称成功');
+               resolve()
+            },
+            function(err){
+                console.error(err.ErrorInfo);
+                reject(err.ErrorInfo)
+            }
+        );
+    })
 }
 //搜索用户
 // 搜索用户
-function searchProfileByUserId(userid, cbOk, cbError) {
-    if (userid.length == 0) {
-        console.error('请输入用户ID')
-          return;
-      }
-    if (webim.Tool.trimStr(userid).length == 0) {
-        console.error('您输入的用户ID全是空格,请重新输入');
-          return;
-      }
-    var tag_list = [
-        'Tag_Profile_IM_Nick', // 昵称
-        'Tag_Profile_IM_Image'// 头像
-      ]
-      var options = {
-        'To_Account': [userid],
-        'TagList': tag_list
-      }
-      webim.getProfilePortrait(
-              options,
-              function (resp) {
-                if (resp.UserProfileItem.length > 0) {
-                    const profileItems = resp.UserProfileItem[0].ProfileItem
-                    const profileItem = {}
-                    for (const index in profileItems) {
-                        const item = profileItems[index]
-                        if (item.Tag == 'Tag_Profile_IM_Nick') {
-                            profileItem.nick = item.Value
+function searchProfileByUserId(userid) {
+
+    return new Promise((resolve,reject)=>{
+        if (userid.length == 0) {
+            console.error('请输入用户ID')
+              return;
+          }
+        if (webim.Tool.trimStr(userid).length == 0) {
+            console.error('您输入的用户ID全是空格,请重新输入');
+              return;
+          }
+          var tag_list = [
+            'Tag_Profile_IM_Nick', // 昵称
+            'Tag_Profile_IM_Image'// 头像
+          ]
+          var options = {
+            'To_Account': [userid],
+            'TagList': tag_list
+          }
+          webim.getProfilePortrait(
+                  options,
+                  function (resp) {
+                    if (resp.UserProfileItem.length > 0) {
+                        const profileItems = resp.UserProfileItem[0].ProfileItem
+                        const profileItem = {}
+                        for (const index in profileItems) {
+                            const item = profileItems[index]
+                            if (item.Tag == 'Tag_Profile_IM_Nick') {
+                                profileItem.nick = item.Value
+                              }
+                            if (item.Tag == 'Tag_Profile_IM_Image') {
+                                profileItem.avatarUrl = item.Value
+                              }
                           }
-                        if (item.Tag == 'Tag_Profile_IM_Image') {
-                            profileItem.avatarUrl = item.Value
-                          }
+                        resolve(profileItem)
                       }
-                    cbOk(profileItem)
+                  },
+                  function (err) {
+                    reject(err.errInfo)
                   }
-              },
-              function (err) {
-                cbError(err.errInfo)
-              }
-      )
-  };
+          )
+    })
+  }
 
 //发送消息(普通消息)
-function onSendMsg(msg,cbOk,cbError) {
+function onSendMsg(msg) {
+
     console.log('accountMode',accountMode);
     if (!loginInfo.identifier) {//未登录
         console.error('请填写帐号和票据');
@@ -258,33 +263,33 @@ function onSendMsg(msg,cbOk,cbError) {
             msg.addText(text_obj);
         }
     }
-    webim.sendMsg(msg, function (resp) {
-        // if (selType == webim.SESSION_TYPE.C2C) {//私聊时，在聊天窗口手动添加一条发的消息，群聊时，长轮询接口会返回自己发的消息
-            
-        // }
-        cbOk(resp)
-        webim.Log.info("发消息成功");
-        //hideDiscussForm();//隐藏评论表单
-        //showDiscussTool();//显示评论工具栏
-        //hideDiscussEmotion();//隐藏表情
-    }, function (err) {
-        webim.Log.error("发消息失败:" + err.ErrorInfo);
-        cbError(err.ErrorInfo);
-    });
+    return new Promise((resolve,reject)=>{
+        webim.sendMsg(msg, function (resp) {
+            // if (selType == webim.SESSION_TYPE.C2C) {//私聊时，在聊天窗口手动添加一条发的消息，群聊时，长轮询接口会返回自己发的消息
+                
+            // }
+            webim.Log.info("发消息成功");
+            resolve(resp)
+            //hideDiscussForm();//隐藏评论表单
+            //showDiscussTool();//显示评论工具栏
+            //hideDiscussEmotion();//隐藏表情
+        }, function (err) {
+            webim.Log.error("发消息失败:" + err.ErrorInfo);
+            reject(err.ErrorInfo);
+        });
+    })
 }
 /**
  * 发送自定义消息，其中MsgShow字段为[其它] 如果在对话列表需要显示最后一条消息（慎用）
  * MsgShow代表最后一条消息
  * @param {*} custMsg 
  */
-function sendCustomMsg(custMsg,cbOk,cbError) {
+function sendCustomMsg(custMsg) {
     if (!selToID) {
         console.error("您还没有好友或群组，暂不能聊天");
         return;
     }
     var data = custMsg.data;
-    // var desc = custMsg.desc;
-    // var ext = custMsg.ext;
     var MsgJson =JSON.stringify(custMsg)
     var msgLen = webim.Tool.getStrBytes(data);
     if (data.length < 1) {
@@ -310,20 +315,23 @@ function sendCustomMsg(custMsg,cbOk,cbError) {
     var custom_obj = new webim.Msg.Elem.Custom(MsgJson);
     msg.addCustom(custom_obj);
     //调用发送消息接口
-    webim.sendMsg(msg, function (resp) {
-        if(selType==webim.SESSION_TYPE.C2C){//私聊时，在聊天窗口手动添加一条发的消息，群聊时，长轮询接口会返回自己发的消息
-            cbOk(resp)
-        }
-    }, function (err) {
-        cbError(err.ErrorInfo);
-    });
+    return new Promise((resolve,reject)=>{
+        webim.sendMsg(msg, function (resp) {
+            // if(selType==webim.SESSION_TYPE.C2C){//私聊时，在聊天窗口手动添加一条发的消息，群聊时，长轮询接口会返回自己发的消息
+            //     cbOk(resp)
+            // }
+            resolve(resp)
+        }, function (err) {
+            reject(err.ErrorInfo);
+        });
+    })
 }
 /**
  * 向上翻页，获取更早的好友历史消息
  * @param {*} cbOk 
  * @param {*} cbError 
  */
-var getPrePageC2CHistoryMsgs = function(cbOk, cbError) {
+function getPrePageC2CHistoryMsgs(){
     if (selType == webim.SESSION_TYPE.GROUP) {
         console.error('当前的聊天类型为群聊天，不能进行拉取好友历史消息操作');
           return;
@@ -344,27 +352,28 @@ var getPrePageC2CHistoryMsgs = function(cbOk, cbError) {
         'LastMsgTime': lastMsgTime, // 最近的消息时间，即从这个时间点向前拉取历史消息
         'MsgKey': msgKey
       }
-      webim.getC2CHistoryMsgs(
-          options,
-          function(resp) {
-            var complete = resp.Complete //是否还有历史消息可以拉取，1-表示没有，0-表示有
-              if (resp.MsgList.length == 0) {
-                webim.Log.warn('没有历史消息了:data=' + JSON.stringify(options))
-                  return;
-              }
-            getPrePageC2CHistroyMsgInfoMap[selToID] = { // 保留服务器返回的最近消息时间和消息Key,用于下次向前拉取历史消息
-                'LastMsgTime': resp.LastMsgTime,
-                'MsgKey': resp.MsgKey
-              }
-              if (cbOk) {
-                cbOk(resp.MsgList)
-              }
-          },
-          cbError
-      )
+      return new Promise ((resolve,reject)=>{
+        webim.getC2CHistoryMsgs(
+            options,
+            function(resp) {
+              var complete = resp.Complete //是否还有历史消息可以拉取，1-表示没有，0-表示有
+                if (resp.MsgList.length == 0) {
+                  webim.Log.warn('没有历史消息了:data=' + JSON.stringify(options))
+                    return;
+                }
+              getPrePageC2CHistroyMsgInfoMap[selToID] = { // 保留服务器返回的最近消息时间和消息Key,用于下次向前拉取历史消息
+                  'LastMsgTime': resp.LastMsgTime,
+                  'MsgKey': resp.MsgKey
+                }
+                resolve(resp.msgList)
+            },function(err){
+                reject(err.ErrorInfo)
+            }
+        )
+      })
   };
 //获取最新的 C2C 历史消息,用于切换好友聊天，重新拉取好友的聊天消息
-var getLastC2CHistoryMsgs = function (cbOk, cbError) {
+function getLastC2CHistoryMsgs(){
     if (selType == webim.SESSION_TYPE.GROUP) {
         console.error('当前的聊天类型为群聊天，不能进行拉取好友历史消息操作');
         return;
@@ -377,7 +386,8 @@ var getLastC2CHistoryMsgs = function (cbOk, cbError) {
         'LastMsgTime': lastMsgTime, //最近的消息时间，即从这个时间点向前拉取历史消息
         'MsgKey': msgKey
     };
-    webim.getC2CHistoryMsgs(
+    return new Promise((resolve,reject)=>{
+        webim.getC2CHistoryMsgs(
             options,
             function (resp) {
                 var complete = resp.Complete;//是否还有历史消息可以拉取，1-表示没有，0-表示有
@@ -390,34 +400,81 @@ var getLastC2CHistoryMsgs = function (cbOk, cbError) {
                     'LastMsgTime': resp.LastMsgTime,
                     'MsgKey': resp.MsgKey
                 };
-                if (cbOk)
-                    cbOk(resp.MsgList);
-            },
-            cbError
-            );
+                    resolve(resp.MsgList)
+            },function(err){
+                reject(err.ErrorInfo)
+            }
+        );
+    })
 }
 //获取最新的群历史消息,用于切换群组聊天时，重新拉取群组的聊天消息
-var getLastGroupHistoryMsgs = function(cbOk) {
+function getLastGroupHistoryMsgs() {
     if (selType == webim.SESSION_TYPE.C2C) {
         console.error('当前的聊天类型为好友聊天，不能进行拉取群历史消息操作');
         return;
     }
-    getGroupInfo(selToID, function(resp) {
-        //拉取最新的群历史消息
-        var options = {
-            'GroupId': selToID,
-            'ReqMsgSeq': resp.GroupInfo[0].NextMsgSeq - 1,
-            'ReqMsgNumber': reqMsgCount
-        };
-        if (options.ReqMsgSeq == null || options.ReqMsgSeq == undefined || options.ReqMsgSeq <= 0) {
-            webim.Log.warn("该群还没有历史消息:options=" + JSON.stringify(options));
+    return new Promise((resolve,reject)=>{
+        getGroupInfo(selToID, function(resp) {
+            //拉取最新的群历史消息
+            var options = {
+                'GroupId': selToID,
+                'ReqMsgSeq': resp.GroupInfo[0].NextMsgSeq - 1,
+                'ReqMsgNumber': reqMsgCount
+            };
+            if (options.ReqMsgSeq == null || options.ReqMsgSeq == undefined || options.ReqMsgSeq <= 0) {
+                webim.Log.warn("该群还没有历史消息:options=" + JSON.stringify(options));
+                return;
+            }
+            selSess = null;
+            webim.MsgStore.delSessByTypeId(selType, selToID);
+            recentSessMap[webim.SESSION_TYPE.GROUP + "_" + selToID] = {};
+
+            recentSessMap[webim.SESSION_TYPE.GROUP + "_" + selToID].MsgGroupReadedSeq = resp.GroupInfo && resp.GroupInfo[0] && resp.GroupInfo[0].MsgSeq;
+                webim.syncGroupMsgs(
+                    options,
+                    function(msgList) {
+                        if (msgList.length == 0) {
+                            webim.Log.warn("该群没有历史消息了:options=" + JSON.stringify(options));
+                            return;
+                        }
+                        var msgSeq = msgList[0].seq - 1;
+                        getPrePageGroupHistroyMsgInfoMap[selToID] = {
+                            "ReqMsgSeq": msgSeq
+                        };
+                        resolve(msgList)
+                    },function(err) {
+                        reject(err.ErrorInfo)
+                        console.error(err.ErrorInfo);
+                    }
+                );
+        })
+    });
+};
+
+//向上翻页，获取更早的群历史消息
+function getPrePageGroupHistoryMsgs() {
+    return new Promise((resolve,reject)=>{
+        if (selType == webim.SESSION_TYPE.C2C) {
+            console.error('当前的聊天类型为好友聊天，不能进行拉取群历史消息操作');
             return;
         }
-        selSess = null;
-        webim.MsgStore.delSessByTypeId(selType, selToID);
-        recentSessMap[webim.SESSION_TYPE.GROUP + "_" + selToID] = {};
-
-        recentSessMap[webim.SESSION_TYPE.GROUP + "_" + selToID].MsgGroupReadedSeq = resp.GroupInfo && resp.GroupInfo[0] && resp.GroupInfo[0].MsgSeq;
+        var tempInfo = getPrePageGroupHistroyMsgInfoMap[selToID]; //获取下一次拉取的群消息seq
+        var reqMsgSeq;
+        if (tempInfo) {
+            reqMsgSeq = tempInfo.ReqMsgSeq;
+            if (reqMsgSeq <= 0) {
+                webim.Log.warn('该群没有历史消息可拉取了');
+                return;
+            }
+        } else {
+            webim.Log.error('获取下一次拉取的群消息seq为空');
+            return;
+        }
+        var options = {
+            'GroupId': selToID,
+            'ReqMsgSeq': reqMsgSeq,
+            'ReqMsgNumber': reqMsgCount
+        };
         webim.syncGroupMsgs(
             options,
             function(msgList) {
@@ -429,63 +486,14 @@ var getLastGroupHistoryMsgs = function(cbOk) {
                 getPrePageGroupHistroyMsgInfoMap[selToID] = {
                     "ReqMsgSeq": msgSeq
                 };
-                //清空聊天界面
-                if (cbOk)
-                    cbOk(msgList);
+                resolve(msgList)
             },
             function(err) {
+                reject(err.ErrorInfo)
                 console.error(err.ErrorInfo);
             }
         );
-    });
-};
-
-//向上翻页，获取更早的群历史消息
-var getPrePageGroupHistoryMsgs = function(cbOk) {
-    if (selType == webim.SESSION_TYPE.C2C) {
-        console.error('当前的聊天类型为好友聊天，不能进行拉取群历史消息操作');
-        return;
-    }
-    var tempInfo = getPrePageGroupHistroyMsgInfoMap[selToID]; //获取下一次拉取的群消息seq
-    var reqMsgSeq;
-    if (tempInfo) {
-        reqMsgSeq = tempInfo.ReqMsgSeq;
-        if (reqMsgSeq <= 0) {
-            webim.Log.warn('该群没有历史消息可拉取了');
-            return;
-        }
-    } else {
-        webim.Log.error('获取下一次拉取的群消息seq为空');
-        return;
-    }
-    var options = {
-        'GroupId': selToID,
-        'ReqMsgSeq': reqMsgSeq,
-        'ReqMsgNumber': reqMsgCount
-    };
-
-    webim.syncGroupMsgs(
-        options,
-        function(msgList) {
-            if (msgList.length == 0) {
-                webim.Log.warn("该群没有历史消息了:options=" + JSON.stringify(options));
-                return;
-            }
-            var msgSeq = msgList[0].seq - 1;
-            getPrePageGroupHistroyMsgInfoMap[selToID] = {
-                "ReqMsgSeq": msgSeq
-            };
-
-            if (cbOk) {
-                cbOk(msgList);
-            } else {
-                getHistoryMsgCallback(msgList, true);
-            }
-        },
-        function(err) {
-            console.error(err.ErrorInfo);
-        }
-    );
+    })
 };
 
 //读取群组基本资料-高级接口
@@ -522,7 +530,7 @@ var getGroupInfo = function(group_id, cbOK, cbErr) {
         options,
         function(resp) {
             if (resp.GroupInfo[0].ShutUpAllMember == 'On') {
-                alert('该群组已开启全局禁言');
+                console.error('该群组已开启全局禁言');
             }
             if (cbOK) {
                 cbOK(resp);
@@ -535,10 +543,16 @@ var getGroupInfo = function(group_id, cbOK, cbErr) {
 };
 
 // 获取未读消息 (非特殊情况无需自己调用)
-function getUnreadMsg(callback){
-    webim.syncMsgs(function () {
-        let sessMap = webim.MsgStore.sessMap()
-        callback & callback(sessMap)
+function getUnreadMsg(){
+    return new Promise((resolve,reject)=>{
+        webim.syncMsgs(function () {
+            let sessMap = webim.MsgStore.sessMap()
+            if(sessMap){
+                resolve(sessMap)
+            }else{
+                reject('sessMap is null')
+            }
+        })
     })
 }
 /**
@@ -550,32 +564,40 @@ function msgAutoRead(selSess, autoread) {
 }
 
 // 获取最近联系人
-function getRecentContactList(cbOk,cbError){
-    webim.getRecentContactList({
-        'Count': 100 //最近的会话数 ,最大为 100
-    },function(resp){
-       console.log("======resp",resp);
-       cbOk(resp)
-    },function(resp){
-        //错误回调
-        console.log("======error resp",resp);
-        cbError(resp)
-    });
+function getRecentContactList(){
+
+    return new Promise((resolve,reject)=>{
+        webim.getRecentContactList({
+            'Count': 100 //最近的会话数 ,最大为 100
+        },function(resp){
+           console.log("======resp",resp);
+           resolve(resp)
+        },function(err){
+            //错误回调
+            console.log("======error",err.ErrorInfo);
+            reject(err.ErrorInfo)
+        });
+    })
 }
 // 获取所有会话
 function getSessionList(cbOk){
-    let sessMap = webim.MsgStore.sessMap();
-    let sess,list=[];
-    for (var i in sessMap) {
-        sess = sessMap[i];
-        if (selToID != sess.id()) {//更新其他聊天对象的未读消息数
-             const data = updateSessDiv(sess.type(),sess.id(),sess.unread())
-             list.push(data)
+    
+    return new Promise((resolve,reject)=>{
+        let sessMap = webim.MsgStore.sessMap();
+        let sess,list=[];
+        for (var i in sessMap) {
+            sess = sessMap[i];
+            if (selToID != sess.id()) {//更新其他聊天对象的未读消息数
+                const data = updateSessDiv(sess.type(),sess.id(),sess.unread())
+                list.push(data)
+            }
         }
-    }
-    if(cbOk){
-        cbOk(list)
-    }
+        if (list.length > 0) {
+            resolve(list)
+        }else{
+            reject('list is null')
+        }
+    })
 }
 // 忘记是做什么用的了，带补充注释
 function updateSessDiv(sess_type, to_id, unread_msg_count) {
@@ -594,27 +616,37 @@ function updateSessDiv(sess_type, to_id, unread_msg_count) {
  * @param {*} to_id 好友id
  * @param {*} callback
  */
-function currentSessById(to_id, callback) {
-    let sess_type = selType //根据初始化设置来获取单聊或群聊当前会话
-    var selSess = webim.MsgStore.sessByTypeId(sess_type, to_id)
-    callback & callback(selSess)
+function currentSessById(to_id) {
+    return new Promise((resolve,reject)=>{
+        let sess_type = selType //根据初始化设置来获取单聊或群聊当前会话
+        var selSess = webim.MsgStore.sessByTypeId(sess_type, to_id)
+        if(selSess){
+            resolve(selSess)
+        }else{
+            reject('selSess is null')
+        }
+    })
   }
 /**
  * 删除当前会话
  * @param {*} chatType =1  // C2C
  * @param {*} to_id  好友 id
  */
-function delChat(to_id, callback) {
-    var data = {
-        'To_Account': to_id,
-        'chatType': selTypeIsGroup?'2':'1'
-      }
-    webim.deleteChat(
-          data,
-          function(resp) {
-            callback(resp)
+function delChat(to_id) {
+    return new Promise((resolve,reject)=>{
+        var data = {
+            'To_Account': to_id,
+            'chatType': selTypeIsGroup?'2':'1'
           }
-      )
+        webim.deleteChat(
+              data,
+              function(resp) {
+                resolve(resp)
+              },function(err){
+                  reject(err.ErrorInfo)
+              }
+          )
+    })
   }
 
 /**
@@ -625,7 +657,7 @@ function delChat(to_id, callback) {
  * @param {*} cbOk 
  * @param {*} cbError 
  */
-function createBigGroup(groupInfo,cbOk,cbError) {
+function createBigGroup(groupInfo) {
     if (!groupInfo.groupId) {
         console.error('群ID不能为空');
         return
@@ -638,17 +670,19 @@ function createBigGroup(groupInfo,cbOk,cbError) {
       'MemberList': [],
       "ApplyJoinOption": "FreeAccess"  // 申请加群处理方式（选填）
     };
-    webim.createGroup(
-      options,
-      function (resp) {
-          console.info( 'succ' )
-          cbOk(resp);
-      },
-      function (err) {
-        console.error(err.ErrorInfo);
-        cbError(err);
-      }
-    );
+    return new Promise((resolve,reject)=>{
+        webim.createGroup(
+            options,
+            function (resp) {
+                console.info( 'succ' )
+                resolve(resp);
+            },
+            function (err) {
+              console.error(err.ErrorInfo);
+              reject(err);
+            }
+          );
+    })
   }
   
   //加入大群
@@ -656,23 +690,27 @@ function createBigGroup(groupInfo,cbOk,cbError) {
       var options = {
           'GroupId': groupId//群id
       };
-      webim.applyJoinBigGroup(
-          options,
-          function (resp) {
-              if (resp.JoinedStatus && resp.JoinedStatus == 'JoinedSuccess') {
-                  webim.Log.info('进群成功');
-                  selToID = groupId;
-              } else {
-                  console.error('进群失败');
-              }
-          },
-          function (err) {
-              console.error(err.ErrorInfo);
-          }
-      );
+      return new Promise((resolve,reject)=>{
+        webim.applyJoinBigGroup(
+            options,
+            function (resp) {
+                if (resp.JoinedStatus && resp.JoinedStatus == 'JoinedSuccess') {
+                    webim.Log.info('进群成功');
+                    selToID = groupId;
+                    resolve('JoinedSuccess')
+                } else {
+                    reject('JoinedFail')
+                    console.error('进群失败');
+                }
+            },function (err) {
+                console.error(err.ErrorInfo);
+                reject(err.ErrorInfo)
+            }
+        );
+      })
   }
 //获取我的群组
-var getMyGroupList = function (cbOk,cbError) {
+function getMyGroupList() {
     // initGetMyGroupTable([]);
     var options = {
         'Member_Account': loginInfo.identifier,
@@ -702,139 +740,157 @@ var getMyGroupList = function (cbOk,cbError) {
             'UnreadMsgNum'
         ]
     };
-    webim.getJoinedGroupListHigh(
-            options,
-            function (resp) {
-                if (!resp.GroupIdList || resp.GroupIdList.length == 0) {
-                    console.error('您目前还没有加入任何群组');
-                    return;
+    return new Promise((resolve,reject)=>{
+            webim.getJoinedGroupListHigh(
+                options,
+                function (resp) {
+                    if (!resp.GroupIdList || resp.GroupIdList.length == 0) {
+                        console.error('您目前还没有加入任何群组');
+                        return;
+                    }
+                    var data = [];
+                    for (var i = 0; i < resp.GroupIdList.length; i++) {
+                        var group_id = resp.GroupIdList[i].GroupId;
+                        var name = webim.Tool.formatText2Html(resp.GroupIdList[i].Name);
+                        var type_en = resp.GroupIdList[i].Type;
+                        var type = webim.Tool.groupTypeEn2Ch(resp.GroupIdList[i].Type);
+                        var role_en = resp.GroupIdList[i].SelfInfo.Role;
+                        var role = webim.Tool.groupRoleEn2Ch(resp.GroupIdList[i].SelfInfo.Role);
+                        var msg_flag = webim.Tool.groupMsgFlagEn2Ch(
+                        resp.GroupIdList[i].SelfInfo.MsgFlag);
+                        var msg_flag_en = resp.GroupIdList[i].SelfInfo.MsgFlag;
+                        var join_time = webim.Tool.formatTimeStamp(
+                        resp.GroupIdList[i].SelfInfo.JoinTime);
+                        var member_num = resp.GroupIdList[i].MemberNum;
+                        var notification = webim.Tool.formatText2Html(
+                        resp.GroupIdList[i].Notification);
+                        var introduction = webim.Tool.formatText2Html(
+                        resp.GroupIdList[i].Introduction);
+                        var ShutUpAllMember = resp.GroupIdList[i].ShutUpAllMember;
+                        data.push({
+                            'GroupId': group_id,
+                            'Name': name,
+                            'TypeEn': type_en,
+                            'Type': type,
+                            'RoleEn': role_en,
+                            'Role': role,
+                            'MsgFlagEn': msg_flag_en,
+                            'MsgFlag': msg_flag,
+                            'MemberNum': member_num,
+                            'Notification': notification,
+                            'Introduction': introduction,
+                            'JoinTime': join_time,
+                            'ShutUpAllMember': ShutUpAllMember
+                        });
+                    }
+                    //打开我的群组列表对话框
+                    // $('#get_my_group_table').bootstrapTable('load', data);
+                    // $('#get_my_group_dialog').modal('show');
+                    resolve(data)
+                },
+                function (err) {
+                    reject(err.ErrorInfo)
                 }
-                var data = [];
-                for (var i = 0; i < resp.GroupIdList.length; i++) {
-                    var group_id = resp.GroupIdList[i].GroupId;
-                    var name = webim.Tool.formatText2Html(resp.GroupIdList[i].Name);
-                    var type_en = resp.GroupIdList[i].Type;
-                    var type = webim.Tool.groupTypeEn2Ch(resp.GroupIdList[i].Type);
-                    var role_en = resp.GroupIdList[i].SelfInfo.Role;
-                    var role = webim.Tool.groupRoleEn2Ch(resp.GroupIdList[i].SelfInfo.Role);
-                    var msg_flag = webim.Tool.groupMsgFlagEn2Ch(
-                    resp.GroupIdList[i].SelfInfo.MsgFlag);
-                    var msg_flag_en = resp.GroupIdList[i].SelfInfo.MsgFlag;
-                    var join_time = webim.Tool.formatTimeStamp(
-                    resp.GroupIdList[i].SelfInfo.JoinTime);
-                    var member_num = resp.GroupIdList[i].MemberNum;
-                    var notification = webim.Tool.formatText2Html(
-                    resp.GroupIdList[i].Notification);
-                    var introduction = webim.Tool.formatText2Html(
-                    resp.GroupIdList[i].Introduction);
-                    var ShutUpAllMember = resp.GroupIdList[i].ShutUpAllMember;
-                    data.push({
-                        'GroupId': group_id,
-                        'Name': name,
-                        'TypeEn': type_en,
-                        'Type': type,
-                        'RoleEn': role_en,
-                        'Role': role,
-                        'MsgFlagEn': msg_flag_en,
-                        'MsgFlag': msg_flag,
-                        'MemberNum': member_num,
-                        'Notification': notification,
-                        'Introduction': introduction,
-                        'JoinTime': join_time,
-                        'ShutUpAllMember': ShutUpAllMember
-                    });
-                }
-                //打开我的群组列表对话框
-                // $('#get_my_group_table').bootstrapTable('load', data);
-                // $('#get_my_group_dialog').modal('show');
-                cbOk(data)
-            },
-            function (err) {
-                cbError(err.ErrorInfo)
-            }
-    );
+        );
+    })
 }
 //读取群组成员
-var getGroupMemberInfo = function (group_id,cbOK,cbError) {
-    // initGetGroupMemberTable([]);
-    var options = {
-        'GroupId': group_id,
-        'Offset': 0, //必须从0开始
-        'Limit': totalCount,
-        'MemberInfoFilter': [
-            'Account',
-            'Role',
-            'JoinTime',
-            'LastSendMsgTime',
-            'ShutUpUntil'
-        ]
-    };
-    webim.getGroupMemberInfo(
-            options,
-            function (resp) {
-                if (resp.MemberNum <= 0) {
-                    console.error('该群组目前没有成员');
-                    return;
-                }
-                var data = [];
-                for (var i in resp.MemberList) {
-                    var account = resp.MemberList[i].Member_Account;
-                    var role = webim.Tool.groupRoleEn2Ch(resp.MemberList[i].Role);
-                    var join_time = webim.Tool.formatTimeStamp(
-                    resp.MemberList[i].JoinTime);
-                    var shut_up_until = webim.Tool.formatTimeStamp(
-                    resp.MemberList[i].ShutUpUntil);
-                    if (shut_up_until == 0) {
-                        shut_up_until = '-';
+function getGroupMemberInfo(group_id) {
+    
+    return new Promise((resolve,reject)=>{
+        if(!group_id){
+            console.error('群组id为空');
+            return
+        }
+        var options = {
+            'GroupId': group_id,
+            'Offset': 0, //必须从0开始
+            'Limit': totalCount,
+            'MemberInfoFilter': [
+                'Account',
+                'Role',
+                'JoinTime',
+                'LastSendMsgTime',
+                'ShutUpUntil'
+            ]
+        };
+            webim.getGroupMemberInfo(
+                options,
+                function (resp) {
+                    if (resp.MemberNum <= 0) {
+                        console.error('该群组目前没有成员');
+                        return;
                     }
-                    data.push({
-                        GroupId: group_id,
-                        Member_Account: account,
-                        Role: role,
-                        JoinTime: join_time,
-                        ShutUpUntil: shut_up_until
-                    });
+                    var data = [];
+                    for (var i in resp.MemberList) {
+                        var account = resp.MemberList[i].Member_Account;
+                        var role = webim.Tool.groupRoleEn2Ch(resp.MemberList[i].Role);
+                        var join_time = webim.Tool.formatTimeStamp(
+                        resp.MemberList[i].JoinTime);
+                        var shut_up_until = webim.Tool.formatTimeStamp(
+                        resp.MemberList[i].ShutUpUntil);
+                        if (shut_up_until == 0) {
+                            shut_up_until = '-';
+                        }
+                        data.push({
+                            GroupId: group_id,
+                            Member_Account: account,
+                            Role: role,
+                            JoinTime: join_time,
+                            ShutUpUntil: shut_up_until
+                        });
+                    }
+                    // $('#get_group_member_table').bootstrapTable('load', data);
+                    // $('#get_group_member_dialog').modal('show');
+                    resolve(data)
+                },
+                function (err) {
+                    // alert(err.ErrorInfo);
+                    reject(err.ErrorInfo)
                 }
-                // $('#get_group_member_table').bootstrapTable('load', data);
-                // $('#get_group_member_dialog').modal('show');
-                cbOK(data)
-            },
-            function (err) {
-                // alert(err.ErrorInfo);
-                cbError(err.ErrorInfo)
-            }
-    );
+        );
+    })
+    
 }
 
 //登出
 function logout() {
-    //登出
-    webim.logout(
-        function (resp) {
-            webim.Log.info('登出成功');
-            loginInfo.identifier = null;
-            loginInfo.userSig = null;
-        }
-    );
+    return new Promise((resolve,reject)=>{
+        webim.logout(
+            function (resp) {
+                webim.Log.info('登出成功');
+                loginInfo.identifier = null;
+                loginInfo.userSig = null;
+                resolve(resp)
+            },function(err){
+                reject(err)
+            }
+        );
+    })
 }
 
 //退出大群
 function quitBigGroup() {
+
     var options = {
         'GroupId': avChatRoomId//群id
     };
-    webim.quitBigGroup(
-        options,
-        function (resp) {
-            webim.Log.info('退群成功');
-            selSess = null;
-            //webim.Log.error('进入另一个大群:'+avChatRoomId2);
-            //applyJoinBigGroup(avChatRoomId2);//加入大群
-        },
-        function (err) {
-            console.error(err.ErrorInfo);
-        }
-    );
+    return new Promise((resolve,reject)=>{
+        webim.quitBigGroup(
+            options,
+            function (resp) {
+                webim.Log.info('退群成功');
+                selSess = null;
+                //webim.Log.error('进入另一个大群:'+avChatRoomId2);
+                //applyJoinBigGroup(avChatRoomId2);//加入大群
+                resolve(resp)
+            },
+            function (err) {
+                console.error(err.ErrorInfo);
+                reject(err)
+            }
+        );
+    })
 }
 
 /**
