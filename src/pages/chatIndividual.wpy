@@ -149,9 +149,7 @@ export default class Example extends wepy.page {
       }
     };
     onMsgNotify(newMsgList) {
-      webimHandler.onMsgNotify(newMsgList, function(newMsg) {
-        console.log('====newMsg:', newMsg)
-      })
+      console.log('====newMsg:', newMsgList)
     }
 }
 </script>

@@ -22,41 +22,36 @@ var selToID
 //监听新消息(私聊(包括普通消息、全员推送消息)，普通群(非直播聊天室)消息)事件
 //newMsgList 为新消息数组，结构为[Msg]
 function onMsgNotify(newMsgList,callback) {
-    debugger
-    console.log("=====newMsgList:",newMsgList);
-    var sess, newMsg;
-    //获取所有聊天会话
-    var sessMap = webim.MsgStore.sessMap();
-    for (var j in newMsgList) {//遍历新消息
-        newMsg = newMsgList[j];
-        if (newMsg.getSession().id() == selToID) {//为当前聊天对象的消息
-            selSess = newMsg.getSession();
-            //在聊天窗体中新增一条消息
-            //console.warn(newMsg);
-            var msg = convertMsgtoHtml(newMsg)
-            console.log("==========msg:",msg);
-            callback(msg);
-        }
-    }
-    //消息已读上报，以及设置会话自动已读标记
-    webim.setAutoRead(selSess, true, true);
-    for (var i in sessMap) {
-        sess = sessMap[i];
-        if (selToID != sess.id()) {//更新其他聊天对象的未读消息数
-            updateSessDiv(sess.type(), sess.id(), sess.unread());
-        }
-    }
+    // var sess, newMsg;
+    // //获取所有聊天会话
+    // var sessMap = webim.MsgStore.sessMap();
+    // for (var j in newMsgList) {//遍历新消息
+    //     newMsg = newMsgList[j];
+    //     if (newMsg.getSession().id() == selToID) {//为当前聊天对象的消息
+    //         selSess = newMsg.getSession();
+    //         var msg = convertMsgtoHtml(newMsg)
+    //         callback(msg);
+    //     }
+    // }
+    // //消息已读上报，以及设置会话自动已读标记
+    // webim.setAutoRead(selSess, true, true);
+    // for (var i in sessMap) {
+    //     sess = sessMap[i];
+    //     if (selToID != sess.id()) {//更新其他聊天对象的未读消息数
+    //         updateSessDiv(sess.type(), sess.id(), sess.unread());
+    //     }
+    // }
 }
 //监听大群新消息（普通，点赞，提示，红包）
 function onBigGroupMsgNotify(msgList,callback) {
-    for (var i = msgList.length - 1; i >= 0; i--) {//遍历消息，按照时间从后往前
-        var msg = msgList[i];
-        //console.warn(msg);
-        webim.Log.warn('receive a new avchatroom group msg: ' + msg.getFromAccountNick());
-        //显示收到的消息
-        console.log("Group ---------0000",msg);
-        callback(msg);
-    }
+    // for (var i = msgList.length - 1; i >= 0; i--) {//遍历消息，按照时间从后往前
+    //     var msg = msgList[i];
+    //     //console.warn(msg);
+    //     webim.Log.warn('receive a new avchatroom group msg: ' + msg.getFromAccountNick());
+    //     //显示收到的消息
+    //     console.log("Group ---------0000",msg);
+    //     callback(msg);
+    // }
 }
 //sdk登录
 function sdkLogin(userInfo, listeners) {

@@ -160,14 +160,10 @@ export default class Example extends wepy.page {
     };
   
     onMsgNotify(newMsgList) {
-      webimHandler.onMsgNotify(newMsgList, function(newMsg) {
-        console.log('====newMsg:', newMsg)
-      })
+      console.log('====newMsg:', newMsgList)
     };
     onBigGroupMsgNotify(newMsgList) {
-      webimHandler.onBigGroupMsgNotify(newMsgList, function(newMsg) {
-        console.log('====00000group Msg:', newMsg)
-      })
+      console.log('====00000group Msg:', newMsgList)
     }
   }
 </script>
