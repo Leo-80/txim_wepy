@@ -17,11 +17,13 @@
   "author": "leo <A_bomb2011@163.com>",
   "license": "MIT",
   "dependencies": {
+    "cryptiles": ">=4.1.2",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-node": "^8.0.0",
+    "hoek": ">=4.2.1",
     "wepy": "^1.6.0",
     "wepy-async-function": "^1.4.4",
-    "wepy-com-toast": "^1.0.2",
-    "cryptiles": ">=4.1.2",
-    "hoek": ">=4.2.1"
+    "wepy-com-toast": "^1.0.2"
   },
   "devDependencies": {
     "babel-eslint": "^10.0.1",

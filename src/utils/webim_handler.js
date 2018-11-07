@@ -866,9 +866,8 @@ function logout() {
 
 //退出大群
 function quitBigGroup() {
-
     var options = {
-        'GroupId': avChatRoomId//群id
+        'GroupId': selToID//群id
     };
     return new Promise((resolve,reject)=>{
         webim.quitBigGroup(
@@ -887,6 +886,33 @@ function quitBigGroup() {
         );
     })
 }
+// 解散群
+var destroyGroup = function (group_id) {
+    return new Promise((resolve,reject)=>{
+        var options = null;
+        if (group_id) {
+            options = {
+                'GroupId': group_id
+            };
+        }
+        if (options == null) {
+            console.error('解散群时，群组ID非法');
+            return;
+        }
+        webim.destroyGroup(
+                options,
+                function (resp) {
+                    //读取我的群组列表
+                    // getJoinedGroupListHigh(getGroupsCallbackOK);
+                    resolve(resp)
+                },
+                function (err) {
+                    reject(err.ErrorInfo)
+                    console.error(err.ErrorInfo);
+                }
+        );
+    })
+};
 
 /**
  *  初始化聊天
@@ -1073,5 +1099,6 @@ module.exports = {
     getLastGroupHistoryMsgs:getLastGroupHistoryMsgs,
     getPrePageGroupHistoryMsgs:getPrePageGroupHistoryMsgs,
     getMyGroupList:getMyGroupList,
-    getGroupMemberInfo:getGroupMemberInfo
+    getGroupMemberInfo:getGroupMemberInfo,
+    destroyGroup:destroyGroup
 };

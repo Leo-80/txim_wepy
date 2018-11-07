@@ -11,6 +11,8 @@
       <view @tap='fetchHistoryMsg'>获取下拉群组历史消息</view>
       <view @tap='fetchGroupList'>获取我的群组列表</view>
       <view @tap='fetchGroupMemberInfo'>获取群成员信息</view>
+      <view @tap='quitGroup'>退出群聊</view>
+      <view @tap='destroyGroup'>群主解散群</view>
   </view>
 </template>
 
@@ -36,52 +38,52 @@ export default class Example extends wepy.page {
           'gName': 'leoTest1234'
         }
         webimHandler.createBigGroup(groupinfo)
-        .then(function(resp) {
-          console.log('createChatGroup === 000', resp)
-        })
-        .catch(function(err) {
-          console.log('createChatGroup === 001', err)
-        })
+          .then(function(resp) {
+            console.log('createChatGroup === 000', resp)
+          })
+          .catch(function(err) {
+            console.log('createChatGroup === 001', err)
+          })
       },
       joinChatGroup() {
         webimHandler.applyJoinBigGroup(this.groupId)
-        .then(function(resp) {
-          console.log('joinChatGroup === 000', resp)
-        })
-        .catch(function(err) {
-          console.log('joinChatGroup === 001', err)
-        })
+          .then(function(resp) {
+            console.log('joinChatGroup === 000', resp)
+          })
+          .catch(function(err) {
+            console.log('joinChatGroup === 001', err)
+          })
       },
       sendIMMsg() {
         var content = '发送一条群组测试消息来自leo'
         if (!content.replace(/^\s*|\s*$/g, '')) return
         webimHandler.onSendMsg(content)
-        .then(function(resp) {
-          console.log('======0000', resp)
-        })
-        .catch(function(err) {
-          console.log('======0001', err)
-        })
+          .then(function(resp) {
+            console.log('======0000', resp)
+          })
+          .catch(function(err) {
+            console.log('======0001', err)
+          })
       },
       fetchLastHistoryMsg() {
         webimHandler.getLastGroupHistoryMsgs()
-        .then(function(resp) {
-          console.log('fetchLastHistoryMsg ====000', resp)
-        })
-        .catch(function(err) {
-          console.log('fetchLastHistoryMsg ====001', err)
-        })
+          .then(function(resp) {
+            console.log('fetchLastHistoryMsg ====000', resp)
+          })
+          .catch(function(err) {
+            console.log('fetchLastHistoryMsg ====001', err)
+          })
       },
       fetchHistoryMsg() {
         webimHandler.getPrePageGroupHistoryMsgs(function(resp) {
         })
         webimHandler.getPrePageGroupHistoryMsgs()
-        .then(function(resp) {
-          console.log('getPrePageGroupHistoryMsgs === 000', resp)
-        })
-        .catch(function(err) {
-          console.log('getPrePageGroupHistoryMsgs === 001', err)
-        })
+          .then(function(resp) {
+            console.log('getPrePageGroupHistoryMsgs === 000', resp)
+          })
+          .catch(function(err) {
+            console.log('getPrePageGroupHistoryMsgs === 001', err)
+          })
       },
       fetchGroupList() {
         webimHandler.getMyGroupList()
@@ -100,6 +102,24 @@ export default class Example extends wepy.page {
           .catch(function(err) {
             console.log('fetchGroupMemberInfo err ====001', err)
           })
+      },
+      quitGroup() {
+        webimHandler.quitBigGroup()
+          .then(function(resp) {
+            console.log('quitGroup ==== 000', resp)
+          })
+          .catch(function(err) {
+            console.log('quitGroup err ====001', err)
+          })
+      },
+      destroyGroup() {
+        webimHandler.destroyGroup(this.groupId)
+          .then(function(resp) {
+            console.log('quitGroup ==== 000', resp)
+          })
+          .catch(function(err) {
+            console.log('quitGroup err ====001', err)
+          })
       }
     };
 
@@ -112,7 +132,7 @@ export default class Example extends wepy.page {
     onLoad() { };
 
     onShow() {
-        // 初始化IM 并登录
+      // 初始化IM 并登录
       this.initIM()
     };
   
@@ -128,12 +148,12 @@ export default class Example extends wepy.page {
         'identifierNick': 'leo', // 当前用户昵称，选填
         'userSig': 'eJxlj81OwkAURvd9iqZbjd7OnREwcSFStQRLqUCQTdOfKUyaaccykoLx3cVK4iTe7Tn5Tu6nZdu2M5*8XiVZVn9UOtYHxR371nbAufyDSok8TnSMTf4P8laJhsdJoXnTQZcxRgBMR*S80qIQZ4OeODJAgnjTGzCCfWrIu7yMu*LvGgVwkRLWMxWx6eCLt3jwZ6PVRVunMn0P0mUaCRmO-JVMx*vSY2zOnx4jd6Gk1xJw9czfhGuZ6TGZ3uuDT6Fo8zDYXr-tIRkeVX0UQzV5DqqtWka0vDOSWkh*fo8C6SPiwKB73uxEXXXCqcNcgvBzjvVlfQPaWl*x' // 当前用户身份凭证，必须是字符串类型，选填
       }
-        // 小吴
-    //   var loginInfo = {
-    //     'identifier': '4513522734356803584', // 当前用户ID,必须是否字符串类型，选填
-    //     'identifierNick': '小吴', // 当前用户昵称，选填
-    //     'userSig': 'eJxlj01Pg0AARO-8CsIVo-spizfUCtgSQ0uq9UKQ3bWbIuCy3dga-7sRm0jiXN-LTObTcV3XKxar86quu31rSnPohedeuR7wzv5g3yteVqbEmv*D4qNXWpSVNEKPEFJKEQBTR3HRGiXVySAUYopQgAmmlwxgyshEHviuHBd-2wgAEBNEg6miXkeYzTY3aX771DfJ*riwvvRhXM-j602DL-wOGKP9dZ683C1BmoSWNc95uo2yju3lfYElh5GcLW20eyC2spko9GOQchXPj8n7dlgdWDOZNOpNnO7hICQ0DOiEWqEH1bWjgACkEGHwE8-5cr4BWvJe5Q__' // 当前用户身份凭证，必须是字符串类型，选填
-    //   }
+      // 小吴
+      //   var loginInfo = {
+      //     'identifier': '4513522734356803584', // 当前用户ID,必须是否字符串类型，选填
+      //     'identifierNick': '小吴', // 当前用户昵称，选填
+      //     'userSig': 'eJxlj01Pg0AARO-8CsIVo-spizfUCtgSQ0uq9UKQ3bWbIuCy3dga-7sRm0jiXN-LTObTcV3XKxar86quu31rSnPohedeuR7wzv5g3yteVqbEmv*D4qNXWpSVNEKPEFJKEQBTR3HRGiXVySAUYopQgAmmlwxgyshEHviuHBd-2wgAEBNEg6miXkeYzTY3aX771DfJ*riwvvRhXM-j602DL-wOGKP9dZ683C1BmoSWNc95uo2yju3lfYElh5GcLW20eyC2spko9GOQchXPj8n7dlgdWDOZNOpNnO7hICQ0DOiEWqEH1bWjgACkEGHwE8-5cr4BWvJe5Q__' // 当前用户身份凭证，必须是字符串类型，选填
+      //   }
 
       var listeners = {
         'onConnNotify': webimHandler.onConnNotify, // 监听连接状态回调变化事件
@@ -148,7 +168,7 @@ export default class Example extends wepy.page {
   
       switch (resp.ErrorCode) {
         case webimHandler.webimWX.CONNECTION_STATUS.ON:
-                    // webim.Log.warn('连接状态正常...');
+          // webim.Log.warn('连接状态正常...');
           break
         case webimHandler.webimWX.CONNECTION_STATUS.OFF:
           console.error('连接已断开，无法收到新消息，请检查下你的网络是否正常')
