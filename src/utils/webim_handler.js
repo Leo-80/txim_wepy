@@ -77,11 +77,9 @@ function sdkLogin(userInfo, listeners) {
                 webim.Log.info('webim登录成功');
                 loginInfo = userInfo;
                 setProfilePortrait({
-                    'ProfileItem': [{
-                        "Tag": "Tag_Profile_IM_Nick",
-                        "Value": userInfo.identifierNick
-                    }]
-                },function(){
+                    identifierNick: userInfo.identifierNick,
+                       selSessHeadUrl: userInfo.selSessHeadUrl
+                  },function(){
                     resolve()
                     console.log('群登录！！！');      
                 })
