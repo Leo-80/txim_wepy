@@ -69,25 +69,30 @@ function sdkLogin(userInfo, listeners) {
         'isLogOn': true// 是否开启控制台打印日志,默认开启，选填
     }   
     //web sdk 登录
-    webim.login(userInfo, listeners, loginOptions,
-        function (identifierNick) {           
-            //identifierNick为登录用户昵称(没有设置时，为帐号)，无登录态时为空
-            console.debug(identifierNick);
-            webim.Log.info('webim登录成功');
-            loginInfo = userInfo;
-            setProfilePortrait({
-                'ProfileItem': [{
-                    "Tag": "Tag_Profile_IM_Nick",
-                    "Value": userInfo.identifierNick
-                }]
-            },function(){
-                console.log('群登录！！！');      
-            })
-        },
-        function (err) {            
-            console.error("00000000",err.ErrorCode,err.ErrorInfo);
-        }
-    );//
+    return new Promise((resolve,reject)=>{
+        webim.login(userInfo, listeners, loginOptions,
+            function (identifierNick) {           
+                //identifierNick为登录用户昵称(没有设置时，为帐号)，无登录态时为空
+                console.debug(identifierNick);
+                webim.Log.info('webim登录成功');
+                loginInfo = userInfo;
+                setProfilePortrait({
+                    'ProfileItem': [{
+                        "Tag": "Tag_Profile_IM_Nick",
+                        "Value": userInfo.identifierNick
+                    }]
+                },function(){
+                    resolve()
+                    console.log('群登录！！！');      
+                })
+                resolve()
+            },
+            function (err) {  
+                reject(err)    
+                console.error("00000000",err.ErrorCode,err.ErrorInfo);
+            }
+        );
+    })
 }
 
 //修改昵称
