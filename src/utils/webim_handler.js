@@ -99,7 +99,7 @@ function setProfilePortrait(options){
     return new Promise((resolve,reject)=>{
         if (!options.identifierNick || !options.selSessHeadUrl) {
             console.error("昵称或头像不能为空");
-            return
+            reject()
         }
         var opt = {
             'ProfileItem':
@@ -133,11 +133,11 @@ function searchProfileByUserId(userid) {
     return new Promise((resolve,reject)=>{
         if (userid.length == 0) {
             console.error('请输入用户ID')
-              return;
+            reject();
           }
         if (webim.Tool.trimStr(userid).length == 0) {
             console.error('您输入的用户ID全是空格,请重新输入');
-              return;
+            reject();
           }
           var tag_list = [
             'Tag_Profile_IM_Nick', // 昵称
@@ -173,25 +173,27 @@ function searchProfileByUserId(userid) {
   }
 
 //发送消息(普通消息)
-function onSendMsg(msg) {
-
+function onSendMsg(msg_josn) {
+    
     console.log('accountMode',accountMode);
+    return new Promise((resolve,reject)=>{
+
     if (!loginInfo.identifier) {//未登录
         console.error('请填写帐号和票据');
-        return;
+        reject();
     }
 
     if (!selToID) {
         console.error("您还没有进入房间，暂不能聊天");
-        return;
+        reject();
     }
     //获取消息内容
-    var msgtosend = msg;
-    var msgLen = webim.Tool.getStrBytes(msg);
+    var msgtosend = msg_josn;
+    var msgLen = webim.Tool.getStrBytes(msg_josn);
 
     if (msgtosend.length < 1) {
         console.error("发送的消息不能为空!");
-        return;
+        reject();
     }
 
     var maxLen, errInfo;
@@ -204,7 +206,7 @@ function onSendMsg(msg) {
     }
     if (msgLen > maxLen) {
         console.error(errInfo);
-        return;
+        reject();
     }
 
     if (!selSess) {
@@ -261,7 +263,6 @@ function onSendMsg(msg) {
             msg.addText(text_obj);
         }
     }
-    return new Promise((resolve,reject)=>{
         webim.sendMsg(msg, function (resp) {
             // if (selType == webim.SESSION_TYPE.C2C) {//私聊时，在聊天窗口手动添加一条发的消息，群聊时，长轮询接口会返回自己发的消息
                 
@@ -283,37 +284,38 @@ function onSendMsg(msg) {
  * @param {*} custMsg 
  */
 function sendCustomMsg(custMsg) {
-    if (!selToID) {
-        console.error("您还没有好友或群组，暂不能聊天");
-        return;
-    }
-    var data = custMsg.data;
-    var MsgJson =JSON.stringify(custMsg)
-    var msgLen = webim.Tool.getStrBytes(data);
-    if (data.length < 1) {
-        console.error("发送的消息不能为空!");
-        return;
-    }
-    var maxLen, errInfo;
-    if (selType == webim.SESSION_TYPE.C2C) {
-        maxLen = webim.MSG_MAX_LENGTH.C2C;
-        errInfo = "消息长度超出限制(最多" + Math.round(maxLen / 3) + "汉字)";
-    } else {
-        maxLen = webim.MSG_MAX_LENGTH.GROUP;
-        errInfo = "消息长度超出限制(最多" + Math.round(maxLen / 3) + "汉字)";
-    }
-    if (msgLen > maxLen) {
-        console.error(errInfo);
-        return;
-    }
-    if (!selSess) {
-        selSess = new webim.Session(selType, selToID, selToID, friendHeadUrl, Math.round(new Date().getTime() / 1000));
-    }
-    var msg = new webim.Msg(selSess, true,-1,-1,-1,loginInfo.identifier,0,loginInfo.identifierNick);
-    var custom_obj = new webim.Msg.Elem.Custom(MsgJson);
-    msg.addCustom(custom_obj);
-    //调用发送消息接口
     return new Promise((resolve,reject)=>{
+        if (!selToID) {
+            console.error("您还没有好友或群组，暂不能聊天");
+            reject();
+        }
+        var data = custMsg.data;
+        var MsgJson =JSON.stringify(custMsg)
+        var msgLen = webim.Tool.getStrBytes(data);
+        if (data.length < 1) {
+            console.error("发送的消息不能为空!");
+            reject();
+        }
+        var maxLen, errInfo;
+        if (selType == webim.SESSION_TYPE.C2C) {
+            maxLen = webim.MSG_MAX_LENGTH.C2C;
+            errInfo = "消息长度超出限制(最多" + Math.round(maxLen / 3) + "汉字)";
+        } else {
+            maxLen = webim.MSG_MAX_LENGTH.GROUP;
+            errInfo = "消息长度超出限制(最多" + Math.round(maxLen / 3) + "汉字)";
+        }
+        if (msgLen > maxLen) {
+            console.error(errInfo);
+            reject();
+        }
+        if (!selSess) {
+            selSess = new webim.Session(selType, selToID, selToID, friendHeadUrl, Math.round(new Date().getTime() / 1000));
+        }
+        var msg = new webim.Msg(selSess, true,-1,-1,-1,loginInfo.identifier,0,loginInfo.identifierNick);
+        var custom_obj = new webim.Msg.Elem.Custom(MsgJson);
+        msg.addCustom(custom_obj);
+    //调用发送消息接口
+    
         webim.sendMsg(msg, function (resp) {
             // if(selType==webim.SESSION_TYPE.C2C){//私聊时，在聊天窗口手动添加一条发的消息，群聊时，长轮询接口会返回自己发的消息
             //     cbOk(resp)
@@ -330,27 +332,29 @@ function sendCustomMsg(custMsg) {
  * @param {*} cbError 
  */
 function getPrePageC2CHistoryMsgs(){
-    if (selType == webim.SESSION_TYPE.GROUP) {
-        console.error('当前的聊天类型为群聊天，不能进行拉取好友历史消息操作');
-          return;
-      }
-    var tempInfo = getPrePageC2CHistroyMsgInfoMap[selToID] //获取上一次拉取的c2c消息时间和消息Key
-      var lastMsgTime
-      var msgKey
-      if (tempInfo) {
-        lastMsgTime = tempInfo.LastMsgTime
-          msgKey = tempInfo.MsgKey
-      } else {
-        console.error('获取下一次拉取的c2c消息时间和消息Key为空');
-          return;
-      }
-    var options = {
-        'Peer_Account': selToID, // 好友帐号
-        'MaxCnt': reqMsgCount, // 拉取消息条数
-        'LastMsgTime': lastMsgTime, // 最近的消息时间，即从这个时间点向前拉取历史消息
-        'MsgKey': msgKey
-      }
-      return new Promise ((resolve,reject)=>{
+    return new Promise ((resolve,reject)=>{
+
+        if (selType == webim.SESSION_TYPE.GROUP) {
+            console.error('当前的聊天类型为群聊天，不能进行拉取好友历史消息操作');
+            return;
+        }
+        var tempInfo = getPrePageC2CHistroyMsgInfoMap[selToID] //获取上一次拉取的c2c消息时间和消息Key
+        var lastMsgTime
+        var msgKey
+        if (tempInfo) {
+            lastMsgTime = tempInfo.LastMsgTime
+            msgKey = tempInfo.MsgKey
+        } else {
+            console.error('获取下一次拉取的c2c消息时间和消息Key为空');
+            return;
+        }
+        var options = {
+            'Peer_Account': selToID, // 好友帐号
+            'MaxCnt': reqMsgCount, // 拉取消息条数
+            'LastMsgTime': lastMsgTime, // 最近的消息时间，即从这个时间点向前拉取历史消息
+            'MsgKey': msgKey
+        }
+      
         webim.getC2CHistoryMsgs(
             options,
             function(resp) {
@@ -372,19 +376,21 @@ function getPrePageC2CHistoryMsgs(){
   };
 //获取最新的 C2C 历史消息,用于切换好友聊天，重新拉取好友的聊天消息
 function getLastC2CHistoryMsgs(){
-    if (selType == webim.SESSION_TYPE.GROUP) {
-        console.error('当前的聊天类型为群聊天，不能进行拉取好友历史消息操作');
-        return;
-    }
-    var lastMsgTime = 0;//第一次拉取好友历史消息时，必须传 0
-    var msgKey = '';
-    var options = {
-        'Peer_Account': selToID, //好友帐号
-        'MaxCnt': reqMsgCount, //拉取消息条数
-        'LastMsgTime': lastMsgTime, //最近的消息时间，即从这个时间点向前拉取历史消息
-        'MsgKey': msgKey
-    };
     return new Promise((resolve,reject)=>{
+
+        if (selType == webim.SESSION_TYPE.GROUP) {
+            console.error('当前的聊天类型为群聊天，不能进行拉取好友历史消息操作');
+            return;
+        }
+        var lastMsgTime = 0;//第一次拉取好友历史消息时，必须传 0
+        var msgKey = '';
+        var options = {
+            'Peer_Account': selToID, //好友帐号
+            'MaxCnt': reqMsgCount, //拉取消息条数
+            'LastMsgTime': lastMsgTime, //最近的消息时间，即从这个时间点向前拉取历史消息
+            'MsgKey': msgKey
+        };
+    
         webim.getC2CHistoryMsgs(
             options,
             function (resp) {
@@ -656,19 +662,20 @@ function delChat(to_id) {
  * @param {*} cbError 
  */
 function createBigGroup(groupInfo) {
-    if (!groupInfo.groupId) {
-        console.error('群ID不能为空');
-        return
-    }
-    var options = {
-      'GroupId': groupInfo.groupId,
-      'Owner_Account': loginInfo.identifier,
-      'Type': groupInfo.gType ?  groupInfo.gType:'ChatRoom',
-      'Name': groupInfo.gName? groupInfo.gName:'DemoGroup',
-      'MemberList': [],
-      "ApplyJoinOption": "FreeAccess"  // 申请加群处理方式（选填）
-    };
     return new Promise((resolve,reject)=>{
+        if (!groupInfo.groupId) {
+            console.error('群ID不能为空');
+            reject()
+        }
+        var options = {
+        'GroupId': groupInfo.groupId,
+        'Owner_Account': loginInfo.identifier,
+        'Type': groupInfo.gType ?  groupInfo.gType:'ChatRoom',
+        'Name': groupInfo.gName? groupInfo.gName:'DemoGroup',
+        'MemberList': [],
+        "ApplyJoinOption": "FreeAccess"  // 申请加群处理方式（选填）
+        };
+    
         webim.createGroup(
             options,
             function (resp) {
