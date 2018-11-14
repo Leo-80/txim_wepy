@@ -407,11 +407,11 @@ function getLastC2CHistoryMsgs(){
 }
 //获取最新的群历史消息,用于切换群组聊天时，重新拉取群组的聊天消息
 function getLastGroupHistoryMsgs() {
-    if (selType == webim.SESSION_TYPE.C2C) {
-        console.error('当前的聊天类型为好友聊天，不能进行拉取群历史消息操作');
-        return;
-    }
     return new Promise((resolve,reject)=>{
+        if (selType == webim.SESSION_TYPE.C2C) {
+            console.error('当前的聊天类型为好友聊天，不能进行拉取群历史消息操作');
+            reject();
+        }
         getGroupInfo(selToID, function(resp) {
             //拉取最新的群历史消息
             var options = {
