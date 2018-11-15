@@ -53,18 +53,18 @@ function onBigGroupMsgNotify(msgList,callback) {
     //     callback(msg);
     // }
 }
-//监听 创建群 系统消息
+//监听 创建群 系统消息 (创建者接收)
 function onCreateGroupNotify(notify) {
 }
-// 监听 申请加入群通知
+// 监听 申请加入群通知（只有管理员接收）
 function onApplyJoinGroupRequestNotify(notify){}
-//监听 被踢出群 系统消息
+//监听 被踢出群 系统消息（只有被踢出者接收）
 function onKickedGroupNotify(notify) {}
-//监听 解散群 系统消息
+//监听 解散群 系统消息 （全员接收）
 function onDestoryGroupNotify(notify) {}
-//监听 主动退群 系统消息
+//监听 主动退群 系统消息（主动退出者接收）
 function onQuitGroupNotify(notify) {}
-//监听 群被回收 系统消息
+//监听 群被回收 系统消息（全员接收）
 function onRevokeGroupNotify(notify) {}
 
 //sdk登录
