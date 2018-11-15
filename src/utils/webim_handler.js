@@ -188,7 +188,7 @@ function onSendMsg(msg_josn) {
         reject();
     }
     //获取消息内容
-    var msgtosend = msg_josn;
+    var msgtosend = JSON.stringify(msg_josn);
     var msgLen = webim.Tool.getStrBytes(msg_josn);
 
     if (msgtosend.length < 1) {

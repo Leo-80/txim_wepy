@@ -26,7 +26,7 @@ export default class Example extends wepy.page {
     };
 
     data = {
-      groupId: 'leoTest4'
+      groupId: '42723963'
     };
 
     components = {};
@@ -55,9 +55,13 @@ export default class Example extends wepy.page {
           })
       },
       sendIMMsg() {
-        var content = '发送一条群组测试消息来自leo'
-        if (!content.replace(/^\s*|\s*$/g, '')) return
-        webimHandler.onSendMsg(content)
+        // var content =
+        let custObj = {
+          data: '发送一条群组测试消息来自leo',
+          type: 0
+        }
+        // if (!content.replace(/^\s*|\s*$/g, '')) return
+        webimHandler.onSendMsg(custObj)
           .then(function(resp) {
             console.log('======0000', resp)
           })
