@@ -158,6 +158,20 @@ export default class Example extends wepy.page {
       //     'identifierNick': '小吴', // 当前用户昵称，选填
       //     'userSig': 'eJxlj01Pg0AARO-8CsIVo-spizfUCtgSQ0uq9UKQ3bWbIuCy3dga-7sRm0jiXN-LTObTcV3XKxar86quu31rSnPohedeuR7wzv5g3yteVqbEmv*D4qNXWpSVNEKPEFJKEQBTR3HRGiXVySAUYopQgAmmlwxgyshEHviuHBd-2wgAEBNEg6miXkeYzTY3aX771DfJ*riwvvRhXM-j602DL-wOGKP9dZ683C1BmoSWNc95uo2yju3lfYElh5GcLW20eyC2spko9GOQchXPj8n7dlgdWDOZNOpNnO7hICQ0DOiEWqEH1bWjgACkEGHwE8-5cr4BWvJe5Q__' // 当前用户身份凭证，必须是字符串类型，选填
       //   }
+      /*
+        "1": onApplyJoinGroupRequestNotify, //申请加群请求（只有管理员会收到）
+        "2": onApplyJoinGroupAcceptNotify, //申请加群被同意（只有申请人能够收到）
+        "3": onApplyJoinGroupRefuseNotify, //申请加群被拒绝（只有申请人能够收到）
+        "4": onKickedGroupNotify, //被管理员踢出群(只有被踢者接收到)
+        "5": onDestoryGroupNotify, //群被解散(全员接收)
+        "6": onCreateGroupNotify, //创建群(创建者接收)
+        "7": onInvitedJoinGroupNotify, //邀请加群(被邀请者接收)
+        "8": onQuitGroupNotify, //主动退群(主动退出者接收)
+        "9": onSetedGroupAdminNotify, //设置管理员(被设置者接收)
+        "10": onCanceledGroupAdminNotify, //取消管理员(被取消者接收)
+        "11": onRevokeGroupNotify, //群已被回收(全员接收)
+        "255": onCustomGroupNotify//用户自定义通知(默认全员接收,暂不支持)
+      */
       var onGroupSystemNotifys = {
         '1': this.onApplyJoinGroupRequestNotify, // 申请加入群（只有管理员收到）
         '6': this.onCreateGroupNotify // 创建群(创建者接收)
