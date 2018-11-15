@@ -26,7 +26,7 @@ export default class Example extends wepy.page {
     };
 
     data = {
-      groupId: '42723963'
+      groupId: 'leotest13'
     };
 
     components = {};
@@ -158,11 +158,15 @@ export default class Example extends wepy.page {
       //     'identifierNick': '小吴', // 当前用户昵称，选填
       //     'userSig': 'eJxlj01Pg0AARO-8CsIVo-spizfUCtgSQ0uq9UKQ3bWbIuCy3dga-7sRm0jiXN-LTObTcV3XKxar86quu31rSnPohedeuR7wzv5g3yteVqbEmv*D4qNXWpSVNEKPEFJKEQBTR3HRGiXVySAUYopQgAmmlwxgyshEHviuHBd-2wgAEBNEg6miXkeYzTY3aX771DfJ*riwvvRhXM-j602DL-wOGKP9dZ683C1BmoSWNc95uo2yju3lfYElh5GcLW20eyC2spko9GOQchXPj8n7dlgdWDOZNOpNnO7hICQ0DOiEWqEH1bWjgACkEGHwE8-5cr4BWvJe5Q__' // 当前用户身份凭证，必须是字符串类型，选填
       //   }
-
+      var onGroupSystemNotifys = {
+        '1': this.onApplyJoinGroupRequestNotify, // 申请加入群（只有管理员收到）
+        '6': this.onCreateGroupNotify // 创建群(创建者接收)
+      }
       var listeners = {
         'onConnNotify': webimHandler.onConnNotify, // 监听连接状态回调变化事件
         'onMsgNotify': this.onMsgNotify, // 监听新消息(私聊，普通群(非直播聊天室)消息，全员推送消息)事件
-        'onBigGroupMsgNotify': this.onBigGroupMsgNotify
+        'onBigGroupMsgNotify': this.onBigGroupMsgNotify,
+        'onGroupSystemNotifys': onGroupSystemNotifys // 监听（多终端同步）群系统消息事件，必填
       }
       webimHandler.sdkLogin(loginInfo, listeners)
     };
@@ -188,6 +192,13 @@ export default class Example extends wepy.page {
     };
     onBigGroupMsgNotify(newMsgList) {
       console.log('====00000group Msg:', newMsgList)
+    };
+    onCreateGroupNotify(notify) {
+      debugger
+      console.log('=== 0000 onCreateGroupNotify:', notify)
+    };
+    onApplyJoinGroupRequestNotify(notify) {
+      console.log('=== 0000 onApplyJoinGroupRequestNotify:', notify)
     }
   }
 </script>

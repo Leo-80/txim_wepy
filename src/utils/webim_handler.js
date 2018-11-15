@@ -53,6 +53,20 @@ function onBigGroupMsgNotify(msgList,callback) {
     //     callback(msg);
     // }
 }
+//监听 创建群 系统消息
+function onCreateGroupNotify(notify) {
+}
+// 监听 申请加入群通知
+function onApplyJoinGroupRequestNotify(notify){}
+//监听 被踢出群 系统消息
+function onKickedGroupNotify(notify) {}
+//监听 解散群 系统消息
+function onDestoryGroupNotify(notify) {}
+//监听 主动退群 系统消息
+function onQuitGroupNotify(notify) {}
+//监听 群被回收 系统消息
+function onRevokeGroupNotify(notify) {}
+
 //sdk登录
 function sdkLogin(userInfo, listeners) {
     userInfo = {
@@ -1078,6 +1092,13 @@ function smsPicClick() {
 module.exports = {
     init : init,
     onMsgNotify : onMsgNotify,
+    onBigGroupMsgNotify:onBigGroupMsgNotify,
+    onCreateGroupNotify:onCreateGroupNotify,
+    onApplyJoinGroupRequestNotify:onApplyJoinGroupRequestNotify,
+    onKickedGroupNotify:onKickedGroupNotify,
+    onDestoryGroupNotify:onDestoryGroupNotify,
+    onQuitGroupNotify:onQuitGroupNotify,
+    onRevokeGroupNotify:onRevokeGroupNotify,
     sdkLogin : sdkLogin,
     convertMsgtoHtml : convertMsgtoHtml,
     convertTextMsgToHtml : convertTextMsgToHtml,
@@ -1102,7 +1123,6 @@ module.exports = {
     currentSessById:currentSessById,
     delChat:delChat,
     getPrePageC2CHistoryMsgs:getPrePageC2CHistoryMsgs,
-    onBigGroupMsgNotify:onBigGroupMsgNotify,
     createBigGroup:createBigGroup,
     applyJoinBigGroup:applyJoinBigGroup,
     quitBigGroup:quitBigGroup,
