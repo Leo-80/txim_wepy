@@ -194,7 +194,6 @@ export default class Example extends wepy.page {
       console.log('====00000group Msg:', newMsgList)
     };
     onCreateGroupNotify(notify) {
-      debugger
       console.log('=== 0000 onCreateGroupNotify:', notify)
     };
     onApplyJoinGroupRequestNotify(notify) {
