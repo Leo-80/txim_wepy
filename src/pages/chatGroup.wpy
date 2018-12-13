@@ -6,13 +6,15 @@
   <view class='container'>
       <view @tap='createChatGroup'>创建群聊</view>
       <view @tap='joinChatGroup'>加入群聊</view>
-      <view @tap='sendIMMsg'>发送消息</view>
+      <view @tap='sendIMMsg(1)'>发送消息</view>
       <view @tap='fetchLastHistoryMsg'>获取最近群组历史消息</view>
       <view @tap='fetchHistoryMsg'>获取下拉群组历史消息</view>
       <view @tap='fetchGroupList'>获取我的群组列表</view>
       <view @tap='fetchGroupMemberInfo'>获取群成员信息</view>
       <view @tap='quitGroup'>退出群聊</view>
       <view @tap='destroyGroup'>群主解散群</view>
+      <view @tap='openC2C'>开启单聊</view>
+      <view @tap='sendIMMsg(2)'>发送单聊消息</view>
   </view>
 </template>
 
@@ -26,7 +28,7 @@ export default class Example extends wepy.page {
     };
 
     data = {
-      groupId: 'leotest13'
+      groupId: '@TGS#2WI64DSFG'
     };
 
     components = {};
@@ -54,10 +56,10 @@ export default class Example extends wepy.page {
             console.log('joinChatGroup === 001', err)
           })
       },
-      sendIMMsg() {
-        // var content =
+      sendIMMsg(type) {
+        var content = type === '1' ? '发送一条群组测试消息来自leo' : '一条测试消息==单聊中'
         let custObj = {
-          data: '发送一条群组测试消息来自leo',
+          data: content,
           type: 0
         }
         // if (!content.replace(/^\s*|\s*$/g, '')) return
@@ -124,6 +126,13 @@ export default class Example extends wepy.page {
           .catch(function(err) {
             console.log('quitGroup err ====001', err)
           })
+      },
+      openC2C() {
+        debugger
+        webimHandler.init({
+          selToID: '4539992675746582528', // 消息接收方id
+          selTypeIsGroup: false
+        })
       }
     };
 
@@ -148,9 +157,9 @@ export default class Example extends wepy.page {
         selTypeIsGroup: true
       })
       var loginInfo = {
-        'identifier': '4520350323367952384', // 当前用户ID,必须是否字符串类型，选填
+        'identifier': '4538169073928765440', // 当前用户ID,必须是否字符串类型，选填
         'identifierNick': 'leo', // 当前用户昵称，选填
-        'userSig': 'eJxlj81OwkAURvd9iqZbjd7OnREwcSFStQRLqUCQTdOfKUyaaccykoLx3cVK4iTe7Tn5Tu6nZdu2M5*8XiVZVn9UOtYHxR371nbAufyDSok8TnSMTf4P8laJhsdJoXnTQZcxRgBMR*S80qIQZ4OeODJAgnjTGzCCfWrIu7yMu*LvGgVwkRLWMxWx6eCLt3jwZ6PVRVunMn0P0mUaCRmO-JVMx*vSY2zOnx4jd6Gk1xJw9czfhGuZ6TGZ3uuDT6Fo8zDYXr-tIRkeVX0UQzV5DqqtWka0vDOSWkh*fo8C6SPiwKB73uxEXXXCqcNcgvBzjvVlfQPaWl*x' // 当前用户身份凭证，必须是字符串类型，选填
+        'userSig': 'eJxlj8tOg0AARfd8BWFbY*YJg4kLhlJtrK1Fa8OK8Jg2k9ZhQqcINP67EZtI4t2ek3tzL5Zt287b4vU2K4rqrExqOi0c*852gHPzB7WWZZqZFNflPyhaLWuRZjsj6gFCSikCYOzIUigjd-JqEIoZdH3gYR8xz6WEjOVTeUiHxd82AgB0CaB0rMj9AJ*jTThfT3X55G1XUS4V1FveJ3EQLXuTT0r*klEeVnXFjiFrkpUK5nvebtzskXt*1yfrc47y*HMGeTs9dJOHcLFsAn2MGZip96a4H00a*SGu9whmCLsEj2gj6pOs1CAgAClEGPzEsb6sb52vXwg_' // 当前用户身份凭证，必须是字符串类型，选填
       }
       // 小吴
       //   var loginInfo = {
@@ -174,7 +183,8 @@ export default class Example extends wepy.page {
       */
       var onGroupSystemNotifys = {
         '1': this.onApplyJoinGroupRequestNotify, // 申请加入群（只有管理员收到）
-        '6': this.onCreateGroupNotify // 创建群(创建者接收)
+        '6': this.onCreateGroupNotify, // 创建群(创建者接收)
+        '8': this.onQuitGroupNotify
       }
       var listeners = {
         'onConnNotify': webimHandler.onConnNotify, // 监听连接状态回调变化事件
@@ -202,16 +212,24 @@ export default class Example extends wepy.page {
     };
   
     onMsgNotify(newMsgList) {
+      debugger
       console.log('====newMsg:', newMsgList)
     };
     onBigGroupMsgNotify(newMsgList) {
+      debugger
       console.log('====00000group Msg:', newMsgList)
     };
     onCreateGroupNotify(notify) {
+      debugger
       console.log('=== 0000 onCreateGroupNotify:', notify)
     };
     onApplyJoinGroupRequestNotify(notify) {
+      debugger
       console.log('=== 0000 onApplyJoinGroupRequestNotify:', notify)
+    };
+    onQuitGroupNotify(notify) {
+      debugger
+      console.log('=== 0000 onQuitGroupNotify:', notify)
     }
   }
 </script>

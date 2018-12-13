@@ -4,8 +4,8 @@ var webim = require('../utils/imsdk/webim_wx');
 var selToID
     ,loginInfo
     ,accountMode = 0 
-    ,accountType = 36883
-    ,sdkAppID = 1400134257 //用户所属应用id,必填
+    ,accountType = 36862
+    ,sdkAppID = 1400164055 //用户所属应用id,必填
     ,avChatRoomId
     ,selType
     ,selSess
@@ -189,7 +189,7 @@ function searchProfileByUserId(userid) {
 //发送消息(普通消息)
 function onSendMsg(msg_josn) {
     
-    console.log('accountMode',accountMode);
+    // console.log('==== onSendMsg msg_josn',msg_josn,selType);
     return new Promise((resolve,reject)=>{
 
     if (!loginInfo.identifier) {//未登录
@@ -635,6 +635,7 @@ function updateSessDiv(sess_type, to_id, unread_msg_count) {
  * @param {*} callback
  */
 function currentSessById(to_id) {
+
     return new Promise((resolve,reject)=>{
         let sess_type = selType //根据初始化设置来获取单聊或群聊当前会话
         var selSess = webim.MsgStore.sessByTypeId(sess_type, to_id)
@@ -684,7 +685,7 @@ function createBigGroup(groupInfo) {
         var options = {
         'GroupId': groupInfo.groupId,
         'Owner_Account': loginInfo.identifier,
-        'Type': groupInfo.gType ?  groupInfo.gType:'ChatRoom',
+        'Type': groupInfo.gType ?  groupInfo.gType:'Public', //ChatRoom
         'Name': groupInfo.gName? groupInfo.gName:'DemoGroup',
         'MemberList': [],
         "ApplyJoinOption": "FreeAccess"  // 申请加群处理方式（选填）
@@ -943,6 +944,7 @@ var destroyGroup = function (group_id) {
  * @param {selToID} opts //selToID 好友id
  */
 function init(opts){
+    selSess = null;
     selToID = opts.selToID;
     selTypeIsGroup = opts.selTypeIsGroup;
     selType= selTypeIsGroup? webim.SESSION_TYPE.GROUP:webim.SESSION_TYPE.C2C;
