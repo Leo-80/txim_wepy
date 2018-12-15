@@ -381,7 +381,7 @@ function getPrePageC2CHistoryMsgs(){
                   'LastMsgTime': resp.LastMsgTime,
                   'MsgKey': resp.MsgKey
                 }
-                resolve(resp.msgList)
+                resolve(resp.MsgList)
             },function(err){
                 reject(err.ErrorInfo)
             }
